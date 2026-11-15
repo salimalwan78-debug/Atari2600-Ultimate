@@ -1,7 +1,7 @@
 name: atari2600_ultimate
 description: A mobile Atari 2600 emulator frontend powered by EmulatorJS.
 publish_to: "none"
-version: 1.0.1+2
+version: 0.0.0+3
 environment:
   sdk: ">=3.4.0 <4.0.0"
 dependencies:
