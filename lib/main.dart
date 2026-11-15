@@ -48,8 +48,11 @@ class _EmulatorHomeState extends State<EmulatorHome> {
       ..addJavaScriptChannel(
         'NativeFilePicker',
         onMessageReceived: (message) {
-          if (message.message == 'pick' || message.message == 'pick:nes') {
-            _pickRomFile(nesOnly: message.message == 'pick:nes');
+          if (message.message == 'pick' || message.message == 'pick:nes' || message.message == 'pick:atari:multiple') {
+            _pickRomFile(
+              nesOnly: message.message == 'pick:nes',
+              multiple: message.message == 'pick:atari:multiple',
+            );
           }
         },
       )
@@ -66,34 +69,52 @@ class _EmulatorHomeState extends State<EmulatorHome> {
       ..loadFlutterAsset('assets/index.html');
   }
 
-  Future<void> _pickRomFile({bool nesOnly = false}) async {
+  Future<void> _pickRomFile({bool nesOnly = false, bool multiple = false}) async {
     if (_pickingFile) return;
     _pickingFile = true;
 
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: nesOnly ? const ['nes'] : const ['a26', 'bin', 'rom', 'nes'],
-        allowMultiple: false,
+        allowedExtensions: nesOnly ? const ['nes'] : const ['a26', 'bin', 'rom'],
+        allowMultiple: multiple,
         withData: true,
       );
 
       if (result == null || result.files.isEmpty) return;
 
-      final file = result.files.single;
-      final bytes = file.bytes;
-      if (bytes == null || bytes.isEmpty) {
-        await _sendPickerError('تعذر قراءة الملف المختار. حاول اختيار الملف مرة أخرى.');
-        return;
+      if (multiple) {
+        var imported = 0;
+        var skipped = 0;
+        for (final file in result.files) {
+          final bytes = file.bytes;
+          if (bytes == null || bytes.isEmpty) {
+            skipped++;
+            continue;
+          }
+          final encodedName = jsonEncode(file.name);
+          final encodedData = jsonEncode(base64Encode(bytes));
+          await _controller.runJavaScript(
+            'window.receiveNativeRom($encodedName, $encodedData, false);',
+          );
+          imported++;
+        }
+        await _controller.runJavaScript(
+          'window.finishNativeBatchImport($imported, $skipped);',
+        );
+      } else {
+        final file = result.files.single;
+        final bytes = file.bytes;
+        if (bytes == null || bytes.isEmpty) {
+          await _sendPickerError('تعذر قراءة الملف المختار. حاول اختيار الملف مرة أخرى.');
+          return;
+        }
+        final encodedName = jsonEncode(file.name);
+        final encodedData = jsonEncode(base64Encode(bytes));
+        await _controller.runJavaScript(
+          'window.receiveNativeRom($encodedName, $encodedData);',
+        );
       }
-
-      final encodedBytes = base64Encode(bytes);
-      final encodedName = jsonEncode(file.name);
-      final encodedData = jsonEncode(encodedBytes);
-
-      await _controller.runJavaScript(
-        'window.receiveNativeRom($encodedName, $encodedData);',
-      );
     } catch (error) {
       await _sendPickerError('تعذر استيراد اللعبة: $error');
     } finally {
