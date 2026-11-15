@@ -40,10 +40,10 @@ if target.suffix == ".kts":
     }
 """
     if 'create("release")' not in text:
-        text = re.sub(r'android\\s*\\{', lambda m: m.group(0) + signing, text, count=1)
+        text = re.sub(r'android\s*\{', lambda m: m.group(0) + signing, text, count=1)
     text = re.sub(
-        r'(buildTypes\\s*\\{\\s*release\\s*\\{)',
-        r'\\1\\n        signingConfig = signingConfigs.getByName("release")',
+        r'(buildTypes\s*\{\s*release\s*\{)',
+        r'\1\n        signingConfig = signingConfigs.getByName("release")',
         text, count=1
     )
 else:
@@ -66,10 +66,10 @@ else:
     }
 """
     if "signingConfigs {" not in text:
-        text = re.sub(r'android\\s*\\{', lambda m: m.group(0) + signing, text, count=1)
+        text = re.sub(r'android\s*\{', lambda m: m.group(0) + signing, text, count=1)
     text = re.sub(
-        r'(buildTypes\\s*\\{\\s*release\\s*\\{)',
-        r'\\1\\n        signingConfig signingConfigs.release',
+        r'(buildTypes\s*\{\s*release\s*\{)',
+        r'\1\n        signingConfig signingConfigs.release',
         text, count=1
     )
 
