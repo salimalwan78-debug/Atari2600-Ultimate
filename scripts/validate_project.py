@@ -15,9 +15,13 @@ def require(condition, message):
     if not condition:
         errors.append(message)
 
-require("assets/emulatorjs/data/cores/" in pubspec,
-        "Flutter assets must explicitly include the nested cores directory.")
-for name in ("loader.js", "emulator.min.js", "emulator.min.css"):
+for asset_dir in ("cores", "src", "localization"):
+    require(f"assets/emulatorjs/data/{asset_dir}/" in pubspec,
+            f"Flutter assets must explicitly include the nested {asset_dir} directory.")
+for name in ("loader.js", "emulator.min.js", "emulator.min.css",
+             "GameManager.js", "compression.js", "emulator.js", "gamepad.js",
+             "nipplejs.js", "shaders.js", "socket.io.min.js", "storage.js",
+             "ar-AR.json"):
     require(name in workflow, f"Build workflow must fetch {name}.")
 for core in ("stella2014", "fceumm"):
     for variant in ("-wasm.data", "-legacy-wasm.data"):
