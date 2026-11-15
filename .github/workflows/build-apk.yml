@@ -50,15 +50,25 @@ jobs:
         run: |
           set -euo pipefail
           BASE="https://cdn.emulatorjs.org/nightly/data"
-          mkdir -p assets/emulatorjs/data/cores
+          mkdir -p assets/emulatorjs/data
           curl -fL "$BASE/loader.js" -o assets/emulatorjs/data/loader.js
           curl -fL "$BASE/emulator.min.js" -o assets/emulatorjs/data/emulator.min.js
           curl -fL "$BASE/emulator.min.css" -o assets/emulatorjs/data/emulator.min.css
           curl -fL "$BASE/cores/stella2014.zip" -o /tmp/stella2014.zip
           curl -fL "$BASE/cores/fceumm.zip" -o /tmp/fceumm.zip
-          unzip -o /tmp/stella2014.zip -d assets/emulatorjs/data/cores
-          unzip -o /tmp/fceumm.zip -d assets/emulatorjs/data/cores
-          test -n "$(find assets/emulatorjs/data/cores -type f | head -1)"
+          unzip -o /tmp/stella2014.zip -d assets/emulatorjs/data
+          unzip -o /tmp/fceumm.zip -d assets/emulatorjs/data
+          echo "Checking required EmulatorJS runtime files..."
+          test -s assets/emulatorjs/data/loader.js
+          test -s assets/emulatorjs/data/emulator.min.js
+          test -s assets/emulatorjs/data/emulator.min.css
+          echo "Checking Stella 2014 core payload..."
+          find assets/emulatorjs/data -maxdepth 1 -type f -iname '*stella2014*' -print
+          test -n "$(find assets/emulatorjs/data -maxdepth 1 -type f -iname '*stella2014*' -print -quit)"
+          echo "Checking FCEUmm core payload..."
+          find assets/emulatorjs/data -maxdepth 1 -type f -iname '*fceumm*' -print
+          test -n "$(find assets/emulatorjs/data -maxdepth 1 -type f -iname '*fceumm*' -print -quit)"
+          echo "All emulator runtime/core files are present in the required data directory."
       - name: Set app version in interface
         run: |
           sed -i "s/const APP_VERSION = '[^']*';/const APP_VERSION = '${APP_VERSION}';/" assets/index.html
