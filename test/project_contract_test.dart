@@ -63,6 +63,8 @@ void main() {
     expect(html, contains('saveState:true'));
     expect(html, contains('loadState:true'));
     expect(html, contains('data-key="ArrowUp"'));
+    expect(html, contains('accept=".a26,.bin,.rom,application/octet-stream"'));
+    expect(html, isNot(contains('accept=".a26,.bin,.rom,.nes,application/octet-stream"')));
   });
 
   test('favorites and theme persistence are present', () {
