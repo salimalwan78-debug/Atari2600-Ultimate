@@ -225,7 +225,6 @@ class _EmulatorHomeState extends State<EmulatorHome> {
         canPop: false,
         onPopInvokedWithResult: (didPop, result) async {
           if (didPop) return;
-          final navigator = Navigator.of(context);
           final canGoBack = await _controller.canGoBack();
           if (!mounted) return;
           if (canGoBack) {
