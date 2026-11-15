@@ -205,7 +205,7 @@ async function launchRom(file,name,gameId=null){
    const game=document.getElementById('game');
    game.innerHTML='<div class="empty"><b>جارٍ تشغيل اللعبة…</b>يتم تحميل ملفات المحاكي المحلية.</div>';
    window.EJS_player='#game';
-   const gameRecord=gameId?(await getGames()).find(item=>item.id===gameId):null;const ext=name.toLowerCase().split('.').pop();const system=gameRecord?.system||({nes:'nes',gb:'gb',gbc:'gbc',gba:'gba',md:'genesis',gen:'genesis',smd:'genesis'}[ext]||'atari');window.EJS_core=({atari:'atari2600',nes:'nes',gb:'gb',gbc:'gbc',gba:'gba',genesis:'segaMD'})[system];
+   const gameRecord=gameId?(await getGames()).find(item=>item.id===gameId):null;const ext=name.toLowerCase().split('.').pop();const system=gameRecord?.system||({nes:'nes',gb:'gb',gbc:'gbc',gba:'gba',md:'genesis',gen:'genesis',smd:'genesis'}[ext]||'atari');window.EJS_core=({atari:'atari2600',nes:'nes',gb:'gb',gbc:'gb',gba:'gba',genesis:'segaMD'})[system];
    window.EJS_gameUrl=currentUrl;
    window.EJS_gameName=name.replace(/\.[^.]+$/,'');
    window.EJS_pathtodata='/assets/emulatorjs/data/';
