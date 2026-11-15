@@ -21,7 +21,7 @@ void main() {
   test('emulator assets are loaded from the local bundled origin', () {
     expect(html, contains("window.EJS_pathtodata='/assets/emulatorjs/data/'"));
     expect(html, isNot(contains('EJS_pathtodata="https://')));
-    expect(html, contains("window.EJS_core=name.toLowerCase().endsWith('.nes')?'nes':'atari2600'"));
+    expect(html, contains("window.EJS_core=({atari:'atari2600',nes:'nes',gb:'gb',gbc:'gbc',gba:'gba',genesis:'segaMD'})[system]"));
   });
 
   test('emulator lifecycle and diagnostics are configured', () {
@@ -49,6 +49,20 @@ void main() {
     expect(html, contains("document.dispatchEvent(new KeyboardEvent('keyup'"));
     expect(html, contains("'Space'"));
     expect(html, contains('lostpointercapture'));
+  });
+
+  test('all requested systems, controls, backup and save states are present', () {
+    for (final page in ['atari', 'nes', 'gb', 'gbc', 'gba', 'genesis']) {
+      expect(html, contains('data-page="$page"'));
+    }
+    for (final platform in ['gb', 'gbc', 'gba', 'genesis']) {
+      expect(html, contains('data-import-system="$platform"'));
+    }
+    expect(html, contains('export-backup'));
+    expect(html, contains('import-backup'));
+    expect(html, contains('saveState:true'));
+    expect(html, contains('loadState:true'));
+    expect(html, contains('data-key="ArrowUp"'));
   });
 
   test('favorites and theme persistence are present', () {
