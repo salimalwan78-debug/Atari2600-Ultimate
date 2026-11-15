@@ -39,6 +39,30 @@ jobs:
           echo "Building $APP_VERSION with Android versionCode $BUILD_NUMBER"
       - name: Generate Android platform
         run: flutter create --platforms=android --org com.atari2600ultimate .
+      - name: Allow loopback-only local WebView asset server
+        run: |
+          set -euo pipefail
+          mkdir -p android/app/src/main/res/xml
+          cat > android/app/src/main/res/xml/network_security_config.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <network-security-config>
+              <domain-config cleartextTrafficPermitted="true">
+                  <domain includeSubdomains="false">127.0.0.1</domain>
+                  <domain includeSubdomains="false">localhost</domain>
+              </domain-config>
+          </network-security-config>
+          EOF
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          path = Path("android/app/src/main/AndroidManifest.xml")
+          tree = ET.parse(path)
+          root = tree.getroot()
+          android = "{http://schemas.android.com/apk/res/android}"
+          root.set(android + "networkSecurityConfig", "@xml/network_security_config")
+          tree.write(path, encoding="utf-8", xml_declaration=True)
+          print("Configured cleartext access only for the loopback WebView server.")
+          PY
       - name: Configure stable Android release signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -87,6 +111,20 @@ jobs:
         run: flutter pub get
       - name: Analyze Dart
         run: flutter analyze --no-pub
+      - name: Run Flutter tests
+        run: flutter test --no-pub
+      - name: Validate JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("assets/index.html").read_text()
+          scripts = re.findall(r"<script(?:\\s[^>]*)?>(.*?)</script>", html, re.S | re.I)
+          Path("/tmp/app-inline.js").write_text("\\n".join(scripts))
+          if not scripts:
+              raise SystemExit("No inline application JavaScript found")
+          PY
+          node --check /tmp/app-inline.js
       - name: Build signed release APK
         run: flutter build apk --release --build-name=0.0.0 --build-number=${{ steps.version.outputs.build_number }}
       - name: Verify APK contains offline emulator payload
