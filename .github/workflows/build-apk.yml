@@ -124,6 +124,8 @@ jobs:
           sed -i "s/const APP_VERSION = '[^']*';/const APP_VERSION = '${APP_VERSION}';/" assets/index.html
       - name: Install dependencies
         run: flutter pub get
+      - name: Validate project contracts
+        run: python3 scripts/validate_project.py
       - name: Analyze Dart
         run: flutter analyze --no-pub
       - name: Run Flutter tests
@@ -150,11 +152,14 @@ jobs:
           unzip -l "$APK" > /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/loader.js' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/emulator.min.js' /tmp/apk-files.txt
+          grep -q 'assets/flutter_assets/assets/emulatorjs/data/emulator.min.css' /tmp/apk-files.txt
+          grep -q 'assets/flutter_assets/assets/index.html' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/stella2014-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/stella2014-legacy-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/fceumm-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/fceumm-legacy-wasm.data' /tmp/apk-files.txt
-          echo "APK contains loader, EmulatorJS runtime and all four selected core data variants."
+          echo "APK contains index, loader, runtime, CSS and all four selected core data variants."
+          apksigner verify --verbose "$APK"
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
