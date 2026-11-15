@@ -39,6 +39,65 @@ jobs:
           echo "Building $APP_VERSION with Android versionCode $BUILD_NUMBER"
       - name: Generate Android platform
         run: flutter create --platforms=android --org com.atari2600ultimate .
+      - name: Enforce Android V2 embedding
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          app = Path("android/app/src/main")
+          package = "com.atari2600ultimate.atari2600_ultimate"
+          activity_dir = app / "kotlin" / Path(package.replace(".", "/"))
+          activity_dir.mkdir(parents=True, exist_ok=True)
+          activity = activity_dir / "MainActivity.kt"
+          activity.write_text(
+              f"package {package}\n\n"
+              "import io.flutter.embedding.android.FlutterActivity\n\n"
+              "class MainActivity : FlutterActivity()\n"
+          )
+
+          manifest = app / "AndroidManifest.xml"
+          tree = ET.parse(manifest)
+          root = tree.getroot()
+          android = "{http://schemas.android.com/apk/res/android}"
+          app_node = root.find("application")
+          if app_node is None:
+              raise SystemExit("Generated Android manifest has no <application>")
+          app_node.attrib.pop(android + "name", None) if app_node.get(android + "name") == "io.flutter.app.FlutterApplication" else None
+          for activity_node in app_node.findall("activity"):
+              name = activity_node.get(android + "name", "")
+              if name.endswith("MainActivity") or name == "io.flutter.app.FlutterActivity":
+                  activity_node.set(android + "name", ".MainActivity")
+          main_activity = next((a for a in app_node.findall("activity") if a.get(android + "name") == ".MainActivity"), None)
+          if main_activity is None:
+              raise SystemExit("Generated manifest has no launcher MainActivity")
+          if not any(m.get(android + "name") == "flutterEmbedding" for m in main_activity.findall("meta-data")):
+              meta = ET.SubElement(main_activity, "meta-data")
+              meta.set(android + "name", "flutterEmbedding")
+              meta.set(android + "value", "2")
+          tree.write(manifest, encoding="utf-8", xml_declaration=True)
+
+          legacy_tokens = (
+              "io.flutter.app.FlutterActivity",
+              "io.flutter.app.FlutterApplication",
+              "io.flutter.view.FlutterView",
+              "PluginRegistry.Registrar",
+          )
+          offenders = []
+          for path in Path("android").rglob("*"):
+              if path.is_file() and path.suffix in (".kt", ".java", ".xml"):
+                  try:
+                      content = path.read_text(errors="ignore")
+                  except OSError:
+                      continue
+                  for token in legacy_tokens:
+                      if token in content:
+                          offenders.append(f"{path}: {token}")
+          if offenders:
+              raise SystemExit("Legacy Android embedding references found:\n" + "\n".join(offenders))
+          print("Android V2 embedding verified; legacy embedding references absent.")
+          PY
       - name: Allow loopback-only local WebView asset server
         run: |
           set -euo pipefail
