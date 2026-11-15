@@ -41,6 +41,7 @@ class _EmulatorHomeState extends State<EmulatorHome> {
   bool _loading = true;
   int _progress = 0;
   bool _pickingFile = false;
+  String? _startupError;
 
   @override
   void initState() {
@@ -93,7 +94,12 @@ class _EmulatorHomeState extends State<EmulatorHome> {
       );
       await _controller.loadRequest(uri);
     } catch (error) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _startupError = 'تعذر تشغيل خادم ملفات التطبيق المحلي. أعد تشغيل التطبيق.\\n\\nالتفاصيل: $error';
+        });
+      }
       debugPrint('Local asset server failed: $error');
     }
   }
@@ -225,7 +231,7 @@ class _EmulatorHomeState extends State<EmulatorHome> {
           if (canGoBack) {
             await _controller.goBack();
           } else {
-            navigator.maybePop();
+            await SystemNavigator.pop();
           }
         },
         child: Scaffold(
@@ -259,6 +265,27 @@ class _EmulatorHomeState extends State<EmulatorHome> {
                             const Text('جارٍ تجهيز منصة الألعاب…',
                                 style: TextStyle(color: Colors.white60)),
                           ],
+                        ),
+                      ),
+                    ),
+                  ),
+                if (_startupError != null)
+                  Positioned.fill(
+                    child: ColoredBox(
+                      color: const Color(0xFF0B0E14),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.error_outline, size: 48, color: Colors.orangeAccent),
+                              const SizedBox(height: 16),
+                              const Text('تعذر بدء التطبيق', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 12),
+                              Text(_startupError!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
+                            ],
+                          ),
                         ),
                       ),
                     ),
