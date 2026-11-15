@@ -35,7 +35,7 @@ jobs:
         with:
           script: |
             const number = context.eventName === 'workflow_dispatch'
-              ? Number(core.getInput('pr_number'))
+              ? Number(context.payload.inputs?.pr_number)
               : context.issue.number;
             if (!Number.isInteger(number) || number < 1) {
               core.setFailed('A valid pull request number is required.');
