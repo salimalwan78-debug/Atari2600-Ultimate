@@ -62,7 +62,7 @@ input[type=file]{display:none}.hint{font-size:12px;color:var(--muted);line-heigh
 .virtual-pad{display:grid;grid-template-columns:repeat(3,54px);gap:7px;justify-content:center;margin:14px auto}
 .virtual-pad button{height:48px;padding:0;font-size:20px;touch-action:none;user-select:none}
 .virtual-pad .fire{background:linear-gradient(135deg,#ffcf75,#e87819);color:#211405}
-.platform-nav{grid-template-columns:repeat(3,minmax(0,1fr))}
+.platform-nav{grid-auto-flow:column;grid-auto-columns:max-content;grid-template-columns:none;justify-content:start}.platform-nav .nav-item{white-space:nowrap;min-width:90px}
 .theme-dot{width:24px;height:24px;padding:0;border-radius:50%;border:2px solid #ffffff55;box-shadow:0 0 0 3px transparent}
 .theme-dot.active{box-shadow:0 0 0 3px #ffffff44;transform:scale(1.12)}
 .theme-dot.gold{background:linear-gradient(135deg,#ffd27a,#ed8413)}
@@ -120,13 +120,13 @@ function setStatus(message){statusEl.textContent=message;}
 window.showNativePickerError=function(message){setStatus(message);};
 let nativeImportQueue=Promise.resolve();
 let nativeBatchStats={imported:0,skipped:0};
-window.receiveNativeRom=function(name,base64,launch=true){
+window.receiveNativeRom=function(name,base64,launch=true,system=null){
  nativeImportQueue=nativeImportQueue.then(async()=>{
   try{
    const binary=atob(base64),bytes=new Uint8Array(binary.length);
    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
    const file=new File([bytes],name,{type:'application/octet-stream'});
-   const saved=await addRomFile(file,{launch});
+   const saved=await addRomFile(file,{launch,system});
    if(!launch){if(saved)nativeBatchStats.imported++;else nativeBatchStats.skipped++;}
   }catch(error){
    if(!launch)nativeBatchStats.skipped++;
