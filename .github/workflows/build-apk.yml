@@ -181,12 +181,23 @@ jobs:
         run: |
           set -euo pipefail
           BASE="https://cdn.emulatorjs.org/stable/data"
-          CORE_DIR="assets/emulatorjs/data/cores"
-          mkdir -p "$CORE_DIR"
-          curl --retry 3 --retry-all-errors -fL "$BASE/loader.js" -o assets/emulatorjs/data/loader.js
-          curl --retry 3 --retry-all-errors -fL "$BASE/emulator.min.js" -o assets/emulatorjs/data/emulator.min.js
-          curl --retry 3 --retry-all-errors -fL "$BASE/emulator.min.css" -o assets/emulatorjs/data/emulator.min.css
-          # EmulatorJS loads these exact files from data/cores/ (not raw .wasm files).
+          DATA_DIR="assets/emulatorjs/data"
+          CORE_DIR="$DATA_DIR/cores"
+          SRC_DIR="$DATA_DIR/src"
+          LOCALE_DIR="$DATA_DIR/localization"
+          mkdir -p "$CORE_DIR" "$SRC_DIR" "$LOCALE_DIR"
+          curl --retry 3 --retry-all-errors -fL "$BASE/loader.js" -o "$DATA_DIR/loader.js"
+          curl --retry 3 --retry-all-errors -fL "$BASE/emulator.min.js" -o "$DATA_DIR/emulator.min.js"
+          curl --retry 3 --retry-all-errors -fL "$BASE/emulator.min.css" -o "$DATA_DIR/emulator.min.css"
+          # The stable loader/runtime also requests these support scripts from data/src/.
+          for file in GameManager.js compression.js emulator.js gamepad.js nipplejs.js shaders.js socket.io.min.js storage.js; do
+            curl --retry 3 --retry-all-errors -fL "$BASE/src/$file" -o "$SRC_DIR/$file"
+            test -s "$SRC_DIR/$file"
+          done
+          # The app UI is Arabic; bundle its locale so the runtime never reaches the network.
+          curl --retry 3 --retry-all-errors -fL "$BASE/localization/ar-AR.json" -o "$LOCALE_DIR/ar-AR.json"
+          # EmulatorJS resolves Atari 2600 to Stella 2014 and NES to FCEUmm.
+          # Keep both normal and legacy single-thread data packs available offline.
           for core in stella2014 fceumm; do
             for variant in "" "-legacy"; do
               file="${core}${variant}-wasm.data"
@@ -194,11 +205,9 @@ jobs:
               test -s "$CORE_DIR/$file"
             done
           done
-          test -s assets/emulatorjs/data/loader.js
-          test -s assets/emulatorjs/data/emulator.min.js
-          test -s assets/emulatorjs/data/emulator.min.css
-          echo "Verified stable EmulatorJS runtime and all four required core data variants:"
-          ls -lh "$CORE_DIR"
+          for file in loader.js emulator.min.js emulator.min.css; do test -s "$DATA_DIR/$file"; done
+          echo "Verified EmulatorJS runtime, support scripts, Arabic localization and Atari/NES core packs."
+          find "$DATA_DIR" -type f -printf '%P %s bytes\\n' | sort
       - name: Set app version
         run: |
           sed -i "s/const APP_VERSION = '[^']*';/const APP_VERSION = '${APP_VERSION}';/" assets/index.html
@@ -233,12 +242,16 @@ jobs:
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/loader.js' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/emulator.min.js' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/emulator.min.css' /tmp/apk-files.txt
+          for file in GameManager.js compression.js emulator.js gamepad.js nipplejs.js shaders.js socket.io.min.js storage.js; do
+            grep -q "assets/flutter_assets/assets/emulatorjs/data/src/$file" /tmp/apk-files.txt
+          done
+          grep -q 'assets/flutter_assets/assets/emulatorjs/data/localization/ar-AR.json' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/index.html' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/stella2014-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/stella2014-legacy-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/fceumm-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/fceumm-legacy-wasm.data' /tmp/apk-files.txt
-          echo "APK contains index, loader, runtime, CSS and all four selected core data variants."
+          echo "APK contains index, loader, runtime, support scripts, Arabic locale and all selected core data variants."
           SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
           test -n "$SDK_ROOT"
           APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
