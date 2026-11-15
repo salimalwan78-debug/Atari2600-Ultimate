@@ -22,7 +22,7 @@ for name in ("loader.js", "emulator.min.js", "emulator.min.css",
              "GameManager.js", "compression.js", "emulator.js", "gamepad.js",
              "nipplejs.js", "shaders.js", "socket.io.min.js", "storage.js",
              "ar-AR.json", "extract7z.js", "extractzip.js",
-             "libunrar.js", "libunrar.wasm", "emulator.css", "version.json"):
+             "libunrar.js", "libunrar.wasm", "emulator.css", "version.json", "cores.json"):
     require(name in workflow, f"Build workflow must fetch {name}.")
 for core in ("stella2014", "fceumm"):
     for variant in ("-wasm.data", "-legacy-wasm.data"):
