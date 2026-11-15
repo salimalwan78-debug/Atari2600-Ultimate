@@ -207,7 +207,7 @@ async function launchRom(file,name,gameId=null){
    window.EJS_Buttons={playPause:false, restart:false, mute:false, settings:false, fullscreen:false, saveState:false, loadState:false, screenRecord:false, gamepad:false, cheat:false};
    window.EJS_onGameStart=()=>{if(sequence===launchSequence){if(launchWatchdog){clearTimeout(launchWatchdog);launchWatchdog=null;}setStatus('اللعبة تعمل الآن: '+name);document.getElementById('game-wrap').classList.add('touch-playing');document.getElementById('touch-hint').classList.add('active');}};
    window.EJS_ready=()=>{if(sequence===launchSequence)setStatus('تم تحميل المحاكي. اسحب داخل الشاشة للحركة وانقر للإطلاق.');};
-   window.EJS_onExit=()=>{if(sequence===launchSequence){setStatus('تم إغلاق اللعبة. اختر لعبة أخرى للتشغيل.');document.getElementById('game-wrap').classList.remove('touch-playing');}};
+   window.EJS_onExit=()=>{if(sequence===launchSequence){setStatus('تم إغلاق اللعبة. اختر لعبة أخرى للتشغيل.');document.getElementById('game-wrap').classList.remove('touch-playing');document.getElementById('touch-hint').classList.remove('active');releaseTouchInput();activeGameId=null;if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}}};
    window.EJS_askBeforeExit=false;
    const script=document.createElement('script');
    script.id='ejs-loader';
