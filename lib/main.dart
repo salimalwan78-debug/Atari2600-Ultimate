@@ -83,7 +83,7 @@ class _EmulatorHomeState extends State<EmulatorHome> {
     try {
       // A loopback HTTP origin supports fetch(), IndexedDB and WebAssembly
       // while keeping every app resource local and available offline.
-      _assetServer = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      _assetServer = await HttpServer.bind(InternetAddress.loopbackIPv4, 8765);
       _assetServer!.listen(_serveAsset);
       final uri = Uri(
         scheme: 'http',
