@@ -5,8 +5,10 @@ An Arabic-first Android frontend for Atari 2600, powered by [EmulatorJS](https:/
 ## Features
 - Android application built with Flutter and WebView.
 - Arabic right-to-left launcher interface.
-- Load Atari 2600 ROM files selected from the device.
-- EmulatorJS provides the emulation runtime and on-screen controls.
+- Import A26, BIN, and ROM files from the device.
+- Persistent on-device game library using browser IndexedDB storage.
+- Mark games as favorites, launch them from the library, or remove them.
+- EmulatorJS provides the emulation runtime and on-screen touch controls.
 - Manual APK build through GitHub Actions.
 
 ## Build the APK
@@ -18,7 +20,7 @@ An Arabic-first Android frontend for Atari 2600, powered by [EmulatorJS](https:/
 The workflow is intentionally manual so ordinary pushes do not consume build minutes.
 
 ## Games and copyright
-No commercial ROM images are included. Import only ROMs you created, own, or are otherwise legally authorized to use. The EmulatorJS runtime is loaded from its public stable CDN, so an internet connection is required when starting a game.
+No commercial ROM images are included. Import only ROMs you created, own, or are otherwise legally authorized to use. Imported game files are stored locally on the device; they are not uploaded to this repository. The EmulatorJS runtime is loaded from its public stable CDN, so an internet connection is required when starting a game.
 
 ## Third-party notices
 - EmulatorJS: https://github.com/EmulatorJS/EmulatorJS (GPL-3.0).
