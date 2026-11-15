@@ -21,7 +21,7 @@ void main() {
   test('emulator assets are loaded from the local bundled origin', () {
     expect(html, contains("window.EJS_pathtodata='/assets/emulatorjs/data/'"));
     expect(html, isNot(contains('EJS_pathtodata="https://')));
-    expect(html, contains("window.EJS_core=({atari:'atari2600',nes:'nes',gb:'gb',gbc:'gbc',gba:'gba',genesis:'segaMD'})[system]"));
+    expect(html, contains("window.EJS_core=({atari:'atari2600',nes:'nes',gb:'gb',gbc:'gb',gba:'gba',genesis:'segaMD'})[system]"));
   });
 
   test('emulator lifecycle and diagnostics are configured', () {
