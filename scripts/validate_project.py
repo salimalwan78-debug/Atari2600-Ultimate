@@ -36,9 +36,9 @@ require("EJS_pathtodata='/assets/emulatorjs/data/'" in html,
         "EmulatorJS data path must point to the bundled local asset server.")
 require("window.EJS_ready=" in html and "window.EJS_onGameStart=" in html,
         "Runtime must expose documented ready and game-start diagnostics.")
-require("window.EJS_terminate" in html,
+require("launchQueue" in html and "EJS_terminate" in html,
         "Previous EmulatorJS sessions must be terminated before relaunch.")
-require("127.0.0.1" in main and "rootBundle.load(assetKey)" in main,
+require("127.0.0.1" in main and "8765" in main and "rootBundle.load(assetKey)" in main,
         "Flutter must serve bundled assets through its local loopback server.")
 require("window.receiveNativeRom" in main and "window.finishNativeBatchImport" in main,
         "Native ROM import bridge is incomplete.")
