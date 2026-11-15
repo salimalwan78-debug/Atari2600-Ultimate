@@ -45,6 +45,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import xml.etree.ElementTree as ET
+          ET.register_namespace("android", "http://schemas.android.com/apk/res/android")
 
           app = Path("android/app/src/main")
           package = "com.atari2600ultimate.atari2600_ultimate"
@@ -133,6 +134,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import xml.etree.ElementTree as ET
+          ET.register_namespace("android", "http://schemas.android.com/apk/res/android")
           path = Path("android/app/src/main/AndroidManifest.xml")
           tree = ET.parse(path)
           root = tree.getroot()
