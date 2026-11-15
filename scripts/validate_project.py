@@ -38,6 +38,17 @@ require("window.EJS_ready=" in html and "window.EJS_onGameStart=" in html,
         "Runtime must expose documented ready and game-start diagnostics.")
 require("launchQueue" in html and "EJS_terminate" in html,
         "Previous EmulatorJS sessions must be terminated before relaunch.")
+
+require("if(activeGameId===id){await stopCurrentEmulator();" in html,
+        "Deleting the active game must stop the EmulatorJS session.")
+require("document.dispatchEvent(new KeyboardEvent('keydown'" in html and "document.dispatchEvent(new KeyboardEvent('keyup'" in html,
+        "Touch controls must dispatch keyboard events through the document event path.")
+require("window.releaseTouchInput=release" in html and "lostpointercapture" in html,
+        "Touch controls must release held keys when pointer capture is lost.")
+require("await SystemNavigator.pop();" in main,
+        "Android back handling must exit the app when WebView has no history.")
+require("_startupError" in main and "تعذر بدء التطبيق" in main,
+        "Local asset server startup failures must be visible to the user.")
 require("127.0.0.1" in main and "8765" in main and "rootBundle.load(assetKey)" in main,
         "Flutter must serve bundled assets through its local loopback server.")
 require("window.receiveNativeRom" in main and "window.finishNativeBatchImport" in main,
