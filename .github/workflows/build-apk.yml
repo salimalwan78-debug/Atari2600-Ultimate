@@ -49,7 +49,7 @@ jobs:
       - name: Download offline EmulatorJS runtime and cores
         run: |
           set -euo pipefail
-          BASE="https://cdn.emulatorjs.org/stable/data"
+          BASE="https://cdn.emulatorjs.org/nightly/data"
           mkdir -p assets/emulatorjs/data/cores
           curl -fL "$BASE/loader.js" -o assets/emulatorjs/data/loader.js
           curl -fL "$BASE/emulator.min.js" -o assets/emulatorjs/data/emulator.min.js
