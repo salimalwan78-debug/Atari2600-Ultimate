@@ -21,3 +21,4 @@ flutter:
     - assets/emulatorjs/data/cores/
     - assets/emulatorjs/data/src/
     - assets/emulatorjs/data/localization/
+    - assets/emulatorjs/data/compression/
