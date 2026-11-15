@@ -29,6 +29,23 @@ jobs:
           cache: true
       - name: Generate Android platform
         run: flutter create --platforms=android --org com.atari2600ultimate .
+      - name: Configure stable Android release signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          echo "$ANDROID_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > android/app/atari-release.jks
+          cat > android/key.properties <<EOF
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyPassword=$ANDROID_KEY_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          storeFile=atari-release.jks
+          EOF
+          python3 scripts/configure_android_signing.py
       - name: Download offline EmulatorJS runtime and cores
         run: |
           set -euo pipefail
@@ -49,7 +66,7 @@ jobs:
         run: flutter pub get
       - name: Analyze
         run: flutter analyze
-      - name: Build release APK
+      - name: Build signed release APK
         run: flutter build apk --release --dart-define=APP_VERSION="${APP_VERSION}"
       - name: Upload APK
         uses: actions/upload-artifact@v4
