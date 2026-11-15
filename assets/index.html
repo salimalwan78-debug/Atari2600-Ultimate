@@ -16,7 +16,7 @@ input[type=file]{display:none}.hint{font-size:12px;color:var(--muted);line-heigh
 #game-wrap{background:#030507;border-radius:16px;overflow:hidden;min-height:210px;display:grid;place-items:center;border:1px solid #ffffff18}
 #game{width:100%;min-height:210px;display:grid;place-items:center;position:relative}#game canvas{max-width:100%;height:auto!important}
 #game-wrap:has(.ejs_container),#game-wrap:has(iframe){position:relative}
-#game .ejs_menu_bar,#game .ejs_menu_bar_container{display:none!important}
+#game .ejs_menu_bar,#game .ejs_menu_bar_container{display:flex!important;flex-wrap:wrap;max-width:100%}
 #game .ejs_container,#game .ejs_game{max-width:100%!important}
 #touch-hint{display:none;color:#aab6c8;font-size:11px;text-align:center;padding:8px}
 #touch-hint.active{display:block}
@@ -28,7 +28,7 @@ input[type=file]{display:none}.hint{font-size:12px;color:var(--muted);line-heigh
 .tag{display:inline-block;color:#ffc15a;background:#ffad3215;border:1px solid #ffad3230;padding:4px 9px;border-radius:20px;font-size:10px;margin-top:9px}
 @media(min-width:600px){header{padding-top:30px}main{padding-top:16px}#game{min-height:340px}}
 
-.bottom-nav{max-width:560px;margin:4px auto 14px;padding:7px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;background:#111a28;border:1px solid #ffffff17;border-radius:19px;box-shadow:0 12px 30px #0005;position:sticky;top:8px;z-index:20;backdrop-filter:blur(18px)}
+.bottom-nav{max-width:760px;margin:4px auto 14px;padding:7px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;overflow-x:auto;background:#111a28;border:1px solid #ffffff17;border-radius:19px;box-shadow:0 12px 30px #0005;position:sticky;top:8px;z-index:20;backdrop-filter:blur(18px)}
 .nav-item{display:flex;align-items:center;justify-content:center;gap:7px;flex-direction:row;background:transparent;color:#9ba9bd;border-radius:14px;padding:10px 8px;font-size:12px}
 .nav-item span{font-size:18px}.nav-item.active{background:linear-gradient(135deg,#ffd27a,#f18a19);color:#201306;box-shadow:0 5px 18px #f18a1940}
 .page-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.page-heading .section-title{margin:4px 0 0;font-size:18px}.eyebrow{font-size:9px;letter-spacing:2px;color:#ffbd59;font-weight:900}.page-icon{font-size:34px;filter:drop-shadow(0 5px 14px #ffad3250)}
@@ -52,6 +52,17 @@ input[type=file]{display:none}.hint{font-size:12px;color:var(--muted);line-heigh
 :root[data-theme="neon"] .nav-item.active{background:linear-gradient(135deg,#e3b5ff,#a64df0);color:#1b0927}
 :root[data-theme="ocean"] .nav-item.active{background:linear-gradient(135deg,#8cecff,#249ecb);color:#041b25}
 .theme-switch{display:flex;justify-content:center;gap:10px;margin-top:13px}
+.library-tools,.backup-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.library-tools input,.library-tools select{min-width:0;flex:1;background:#0c1522;color:#fff;border:1px solid #ffffff20;border-radius:12px;padding:11px}
+.view-toggle{display:flex;gap:6px}.view-toggle button.active{background:var(--gold);color:#201306}
+.game-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.game-grid .game-row{display:flex;flex-direction:column;align-items:stretch;min-height:170px;padding:10px}
+.game-cover{height:92px;border-radius:13px;display:grid;place-items:center;font-size:34px;background:linear-gradient(135deg,#35445c,#121c2d);border:1px solid #ffffff18}
+.game-grid .game-info{width:100%}.game-grid .game-row button{width:100%}
+.virtual-pad{display:grid;grid-template-columns:repeat(3,54px);gap:7px;justify-content:center;margin:14px auto}
+.virtual-pad button{height:48px;padding:0;font-size:20px;touch-action:none;user-select:none}
+.virtual-pad .fire{background:linear-gradient(135deg,#ffcf75,#e87819);color:#211405}
+.platform-nav{grid-template-columns:repeat(3,minmax(0,1fr))}
 .theme-dot{width:24px;height:24px;padding:0;border-radius:50%;border:2px solid #ffffff55;box-shadow:0 0 0 3px transparent}
 .theme-dot.active{box-shadow:0 0 0 3px #ffffff44;transform:scale(1.12)}
 .theme-dot.gold{background:linear-gradient(135deg,#ffd27a,#ed8413)}
@@ -59,22 +70,31 @@ input[type=file]{display:none}.hint{font-size:12px;color:var(--muted);line-heigh
 .theme-dot.ocean{background:linear-gradient(135deg,#8cecff,#249ecb)}
 </style></head><body>
 <header><div class="mark">✦</div><h1>ATARI 2600 ULTIMATE</h1><div class="sub">عُد إلى العصر الذهبي لألعاب الفيديو</div><span class="tag">ATARI 2600 · STELLA CORE</span><div class="theme-switch" aria-label="اختيار الثيم"><button data-theme="gold" class="theme-dot gold active" aria-label="الثيم الذهبي"></button><button data-theme="neon" class="theme-dot neon" aria-label="الثيم النيون"></button><button data-theme="ocean" class="theme-dot ocean" aria-label="الثيم الأزرق"></button></div></header>
-<nav class="bottom-nav" aria-label="أقسام مكتبة الألعاب">
+<nav class="bottom-nav platform-nav" aria-label="منصات الألعاب">
 <button class="nav-item active" data-page="atari"><span>🕹️</span><b>Atari</b></button>
-<button class="nav-item" data-page="nes"><span>🎮</span><b>Nintendo</b></button>
+<button class="nav-item" data-page="nes"><span>🎮</span><b>NES</b></button>
+<button class="nav-item" data-page="gb"><span>🟩</span><b>Game Boy</b></button>
+<button class="nav-item" data-page="gbc"><span>🎨</span><b>Game Boy Color</b></button>
+<button class="nav-item" data-page="gba"><span>🎒</span><b>Game Boy Advance</b></button>
+<button class="nav-item" data-page="genesis"><span>🔵</span><b>Sega Genesis</b></button>
 <button class="nav-item" data-page="favorites"><span>⭐</span><b>المفضلة</b></button>
 </nav>
 <main>
 <section class="panel" id="free-panel"><h2 class="section-title">🆓 ألعاب مجانية جاهزة</h2><p class="hint">هذه ألعاب مجانية اختيارية. يمكنك إضافتها يدوياً عند توفر الإنترنت؛ ويُتحقق من سلامة الملف قبل حفظه في مكتبتك.</p><div id="free-games"><div class="empty-list">جارٍ تجهيز الألعاب المجانية…</div></div></section>
 <section class="panel" id="nes-panel"><div class="page-heading"><div><span class="eyebrow">RETRO COLLECTION</span><h2 class="section-title">Nintendo Entertainment System</h2></div><span class="page-icon">🎮</span></div><p class="hint">استورد ملفات ألعاب NES بصيغة .nes لتشغيلها بمحاكي Nintendo مستقل. ملفات NES لن تُشغّل على محاكي Atari.</p><div class="actions"><button class="primary" id="import-nes" type="button">＋ استيراد ألعاب NES</button></div></section>
+<section class="panel" id="gb-panel" style="display:none"><h2 class="section-title">Nintendo Game Boy</h2><p class="hint">استورد ملفات GB.</p><button class="primary" data-import-system="gb">＋ استيراد Game Boy</button></section>
+<section class="panel" id="gbc-panel" style="display:none"><h2 class="section-title">Nintendo Game Boy Color</h2><p class="hint">استورد ملفات GBC.</p><button class="primary" data-import-system="gbc">＋ استيراد Game Boy Color</button></section>
+<section class="panel" id="gba-panel" style="display:none"><h2 class="section-title">Game Boy Advance</h2><p class="hint">استورد ملفات GBA.</p><button class="primary" data-import-system="gba">＋ استيراد GBA</button></section>
+<section class="panel" id="genesis-panel" style="display:none"><h2 class="section-title">Sega Genesis / Mega Drive</h2><p class="hint">استورد MD وGEN وSMD وBIN. استخدم هذا القسم لملفات BIN الخاصة بـ Sega.</p><button class="primary" data-import-system="genesis">＋ استيراد Sega Genesis</button></section>
 <section class="panel" id="atari-panel"><div class="page-heading"><div><span class="eyebrow">CLASSIC COLLECTION</span><h2 class="section-title">Atari 2600</h2></div><span class="page-icon">🕹️</span></div><div class="actions">
 <button class="file-label primary" id="import-rom" type="button">＋ استيراد لعبة من جهازي</button><button class="secondary" id="import-many" type="button">＋ استيراد مجموعة ألعاب</button><input id="rom" type="file" accept=".a26,.bin,.rom,.nes,application/octet-stream" hidden>
 <button class="secondary" id="fullscreen">ملء الشاشة</button></div>
 <p class="hint">تُحفظ الألعاب المستوردة داخل التطبيق على جهازك، وتبقى في المكتبة بعد إغلاقه. يمكنك أيضاً إضافة ملفات ألعابك الخاصة بصيغ A26 وBIN وROM.</p>
 </section>
-<section class="panel" id="library-panel"><div class="page-heading"><div><span class="eyebrow">YOUR GAME LIBRARY</span><h2 class="section-title" id="library-title">ألعاب Atari الخاصة بك</h2></div><span class="page-icon">📚</span></div><div id="library" aria-live="polite"><div class="empty-list">جارٍ تحميل مكتبة الألعاب…</div></div><div id="status" aria-live="polite">المحاكي جاهز.</div></section>
+<section class="panel" id="library-panel"><div class="page-heading"><div><span class="eyebrow">YOUR GAME LIBRARY</span><h2 class="section-title" id="library-title">ألعاب Atari الخاصة بك</h2></div><span class="page-icon">📚</span></div><div class="library-tools"><input id="library-search" type="search" placeholder="ابحث عن لعبة…"><select id="library-sort"><option value="newest">الأحدث</option><option value="name">الاسم</option><option value="oldest">الأقدم</option></select><div class="view-toggle"><button id="list-view" class="secondary active">☰</button><button id="grid-view" class="secondary">▦</button></div></div><div id="library" aria-live="polite"><div class="empty-list">جارٍ تحميل مكتبة الألعاب…</div></div><div id="status" aria-live="polite">المحاكي جاهز.</div></section>
 <section class="panel" id="player-panel"><div class="page-heading"><div><span class="eyebrow">NOW PLAYING</span><h2 class="section-title">شاشة اللعب</h2></div><span class="page-icon">✨</span></div><div id="game-wrap"><div id="game"><div class="empty"><b>جاهز للانطلاق؟</b>اختر لعبة من مكتبتك وابدأ المغامرة.</div></div></div></section>
-<section class="panel" id="controls-panel"><h2 class="section-title">👆 التحكم باللمس</h2><p class="hint">اسحب إصبعك داخل شاشة اللعبة لتحديد اتجاه الحركة، وارفع إصبعك لإيقاف الاتجاه. انقر نقرة قصيرة لإطلاق النار.</p><div id="touch-hint">اسحب للحركة · انقر للإطلاق</div></section>
+<section class="panel" id="controls-panel"><h2 class="section-title">👆 التحكم باللمس</h2><p class="hint">اسحب إصبعك داخل شاشة اللعبة لتحديد اتجاه الحركة، وارفع إصبعك لإيقاف الاتجاه. انقر نقرة قصيرة لإطلاق النار.</p><div class="virtual-pad"><span></span><button data-key="ArrowUp" class="secondary">▲</button><span></span><button data-key="ArrowLeft" class="secondary">◀</button><button data-key="ArrowDown" class="secondary">▼</button><button data-key="ArrowRight" class="secondary">▶</button><span></span><span></span><button data-key=" " class="fire">●</button></div><div id="touch-hint">اسحب للحركة أو استخدم الأزرار · انقر للإطلاق</div></section>
+<section class="panel" id="backup-panel"><h2 class="section-title">💾 النسخ الاحتياطي</h2><p class="hint">تصدير واستيراد ألعابك ومفضلاتك في ملف واحد.</p><div class="backup-actions"><button class="primary" id="export-backup">تصدير النسخة الاحتياطية</button><button class="secondary" id="import-backup">استيراد نسخة احتياطية</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div></section>
 </main><footer>ATARI 2600 ULTIMATE<br>مشروع مستقل يستخدم EmulatorJS · Stella 2014<br>الألعاب المجانية مرفقة بأسماء مطوريها وروابط تراخيصها.</footer>
 <script>
 const APP_VERSION = 'V0';
@@ -129,25 +149,17 @@ function removeGame(id){return new Promise((resolve,reject)=>{const tx=db.transa
 function safeText(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 let activePage='atari';
+const PLATFORM_LABELS={atari:'Atari 2600',nes:'Nintendo NES',gb:'Game Boy',gbc:'Game Boy Color',gba:'Game Boy Advance',genesis:'Sega Genesis'};
+function gameSystem(game){if(game.system)return game.system;const n=game.name.toLowerCase();if(n.endsWith('.nes'))return 'nes';if(n.endsWith('.gbc'))return 'gbc';if(n.endsWith('.gba'))return 'gba';if(n.endsWith('.gb'))return 'gb';if(/\.(md|gen|smd)$/.test(n))return 'genesis';return 'atari';}
 function showPage(page){
- activePage=page;
- document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
- document.getElementById('atari-panel').style.display=page==='atari'?'block':'none';
- document.getElementById('free-panel').style.display=page==='atari'?'block':'none';
- document.getElementById('nes-panel').style.display=page==='nes'?'block':'none';
- document.getElementById('player-panel').style.display='block';
- document.getElementById('controls-panel').style.display=page==='atari'?'block':'none';document.getElementById('library-title').textContent=page==='atari'?'ألعاب Atari الخاصة بك':page==='nes'?'ألعاب Nintendo NES':'ألعابك المفضلة';
- renderLibrary();
- window.scrollTo({top:0,behavior:'smooth'});
+ activePage=page;document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+ ['atari','nes','gb','gbc','gba','genesis'].forEach(key=>{const el=document.getElementById(key+'-panel');if(el)el.style.display=page===key?'block':'none';});
+ document.getElementById('free-panel').style.display=page==='atari'?'block':'none';document.getElementById('player-panel').style.display='block';document.getElementById('controls-panel').style.display=page==='favorites'?'none':'block';
+ document.getElementById('library-title').textContent=page==='favorites'?'ألعابك المفضلة':'ألعاب '+(PLATFORM_LABELS[page]||'');renderLibrary();window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
-function belongsToPage(game,page){
- const nes=game.name.toLowerCase().endsWith('.nes');
- if(page==='nes')return nes;
- if(page==='favorites')return !!game.favorite;
- return !nes;
-}
-async function renderLibrary(){const host=document.getElementById('library');try{const allGames=await getGames();const games=allGames.filter(g=>belongsToPage(g,activePage));if(!games.length){const msg=activePage==='favorites'?'لم تضف ألعاباً إلى المفضلة بعد. اضغط ⭐ على أي لعبة لإضافتها هنا.':activePage==='nes'?'مكتبة Nintendo فارغة. استورد ملفات ألعاب NES بصيغة .nes.':'مكتبة Atari فارغة. استورد ألعابك أو أضف ألعاباً مجانية.';host.innerHTML='<div class="empty-list">'+msg+'</div>';return;}host.innerHTML=games.map(g=>'<div class="game-row"><div class="game-info"><div class="game-name">'+safeText(g.name)+'</div><div class="game-meta">'+(g.credit?safeText(g.credit)+' · ':'')+(g.license?safeText(g.license)+' · ':'')+(g.size/1024).toFixed(0)+' KB'+(g.sourceUrl?' · <a href="'+safeText(g.sourceUrl)+'" target="_blank">المصدر</a>':'')+(g.licenseUrl?' · <a href="'+safeText(g.licenseUrl)+'" target="_blank">الترخيص</a>':'')+'</div></div><button class="secondary fav" data-action="favorite" data-id="'+g.id+'" aria-label="المفضلة">'+(g.favorite?'★':'☆')+'</button><button class="primary" data-action="play" data-id="'+g.id+'">تشغيل</button><button class="secondary danger" data-action="delete" data-id="'+g.id+'">حذف</button></div>').join('');}catch(e){host.innerHTML='<div class="empty-list">تعذر قراءة المكتبة على هذا الجهاز.</div>';setStatus('تعذر فتح قاعدة بيانات المكتبة: '+e.message);}}
+function belongsToPage(game,page){if(page==='favorites')return !!game.favorite;return gameSystem(game)===page;}
+async function renderLibrary(){const host=document.getElementById('library');try{const allGames=await getGames();let games=allGames.filter(g=>belongsToPage(g,activePage));const query=(document.getElementById('library-search')?.value||'').trim().toLowerCase();if(query)games=games.filter(g=>g.name.toLowerCase().includes(query));const sort=document.getElementById('library-sort')?.value||'newest';games.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='oldest'?a.addedAt-b.addedAt:b.addedAt-a.addedAt);host.classList.toggle('game-grid',localStorage.getItem('atari-library-view')==='grid');if(!games.length){const msg=activePage==='favorites'?'لم تضف ألعاباً إلى المفضلة بعد. اضغط ⭐ على أي لعبة لإضافتها هنا.':activePage==='nes'?'مكتبة Nintendo فارغة. استورد ملفات ألعاب NES بصيغة .nes.':'مكتبة Atari فارغة. استورد ألعابك أو أضف ألعاباً مجانية.';host.innerHTML='<div class="empty-list">'+msg+'</div>';return;}host.innerHTML=games.map(g=>'<div class="game-row"><div class="game-cover">'+(gameSystem(g)==='atari'?'🕹️':gameSystem(g)==='nes'?'🎮':gameSystem(g)==='genesis'?'🔵':'🟩')+'</div><div class="game-info"><div class="game-name">'+safeText(g.name)+'</div><div class="game-meta">'+(g.credit?safeText(g.credit)+' · ':'')+(g.license?safeText(g.license)+' · ':'')+(g.size/1024).toFixed(0)+' KB'+(g.sourceUrl?' · <a href="'+safeText(g.sourceUrl)+'" target="_blank">المصدر</a>':'')+(g.licenseUrl?' · <a href="'+safeText(g.licenseUrl)+'" target="_blank">الترخيص</a>':'')+'</div></div><button class="secondary fav" data-action="favorite" data-id="'+g.id+'" aria-label="المفضلة">'+(g.favorite?'★':'☆')+'</button><button class="primary" data-action="play" data-id="'+g.id+'">تشغيل</button><button class="secondary danger" data-action="delete" data-id="'+g.id+'">حذف</button></div>').join('');}catch(e){host.innerHTML='<div class="empty-list">تعذر قراءة المكتبة على هذا الجهاز.</div>';setStatus('تعذر فتح قاعدة بيانات المكتبة: '+e.message);}}
 async function renderFreeGames(){const host=document.getElementById('free-games');const installed=new Set((await getGames()).map(g=>g.id));host.innerHTML=FREE_GAMES.map(g=>'<div class="catalog-row"><div class="game-info"><div class="game-name">'+safeText(g.name)+'</div><div class="game-meta">'+safeText(g.credit)+' · '+safeText(g.license)+'<br>'+safeText(g.hint)+'<br><a href="'+safeText(g.sourceUrl)+'" target="_blank">المصدر</a> · <a href="'+safeText(g.licenseUrl)+'" target="_blank">الترخيص</a></div></div><button class="secondary" data-free="'+g.id+'" '+(installed.has(g.id)?'disabled':'')+'>'+(installed.has(g.id)?'في المكتبة':'إضافة')+'</button></div>').join('');}
 async function installFreeGame(game,auto=false){const existing=(await getGames()).find(g=>g.id===game.id);if(existing)return;setStatus('جارٍ تنزيل '+game.name+' والتحقق من سلامة الملف…');const response=await fetch(game.url);if(!response.ok)throw new Error('تعذر تنزيل '+game.name+' (HTTP '+response.status+')');const blob=await response.blob();const digest=await crypto.subtle.digest('SHA-256',await blob.arrayBuffer());const hash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');if(hash!==game.sha256)throw new Error('فشل التحقق من سلامة ملف '+game.name+'؛ لم تتم إضافته.');await storeGame({id:game.id,name:game.name+'.bin',size:blob.size,blob,favorite:false,addedAt:Date.now(),credit:game.credit,license:game.license,licenseUrl:game.licenseUrl,sourceUrl:game.sourceUrl});await renderLibrary();await renderFreeGames();setStatus('تمت إضافة '+game.name+' بنجاح إلى مكتبتك.');}
 let launchSequence=0,launchWatchdog=null,launchQueue=Promise.resolve();
@@ -193,7 +205,7 @@ async function launchRom(file,name,gameId=null){
    const game=document.getElementById('game');
    game.innerHTML='<div class="empty"><b>جارٍ تشغيل اللعبة…</b>يتم تحميل ملفات المحاكي المحلية.</div>';
    window.EJS_player='#game';
-   window.EJS_core=name.toLowerCase().endsWith('.nes')?'nes':'atari2600';
+   const gameRecord=gameId?(await getGames()).find(item=>item.id===gameId):null;const ext=name.toLowerCase().split('.').pop();const system=gameRecord?.system||({nes:'nes',gb:'gb',gbc:'gbc',gba:'gba',md:'genesis',gen:'genesis',smd:'genesis'}[ext]||'atari');window.EJS_core=({atari:'atari2600',nes:'nes',gb:'gb',gbc:'gbc',gba:'gba',genesis:'segaMD'})[system];
    window.EJS_gameUrl=currentUrl;
    window.EJS_gameName=name.replace(/\.[^.]+$/,'');
    window.EJS_pathtodata='/assets/emulatorjs/data/';
@@ -204,7 +216,7 @@ async function launchRom(file,name,gameId=null){
    window.EJS_color=getComputedStyle(document.documentElement).getPropertyValue('--gold').trim()||'#ffad32';
    window.EJS_backgroundColor='#030507';
    window.EJS_language='ar';
-   window.EJS_Buttons={playPause:false, restart:false, mute:false, settings:false, fullscreen:false, saveState:false, loadState:false, screenRecord:false, gamepad:false, cheat:false};
+   window.EJS_Buttons={playPause:true, restart:true, mute:true, settings:true, fullscreen:true, saveState:true, loadState:true, screenRecord:false, gamepad:true, cheat:false};
    window.EJS_onGameStart=()=>{if(sequence===launchSequence){if(launchWatchdog){clearTimeout(launchWatchdog);launchWatchdog=null;}setStatus('اللعبة تعمل الآن: '+name);document.getElementById('game-wrap').classList.add('touch-playing');document.getElementById('touch-hint').classList.add('active');}};
    window.EJS_ready=()=>{if(sequence===launchSequence)setStatus('تم تحميل المحاكي. اسحب داخل الشاشة للحركة وانقر للإطلاق.');};
    window.EJS_onExit=()=>{if(sequence===launchSequence){setStatus('تم إغلاق اللعبة. اختر لعبة أخرى للتشغيل.');document.getElementById('game-wrap').classList.remove('touch-playing');document.getElementById('touch-hint').classList.remove('active');releaseTouchInput();activeGameId=null;if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}}};
@@ -221,11 +233,14 @@ async function launchRom(file,name,gameId=null){
  launchQueue=launchQueue.then(start,start);
  return launchQueue;
 }
-async function addRomFile(file,{launch=true}={}){if(!file)return false;const ext=file.name.split('.').pop().toLowerCase();if(!['a26','bin','rom','nes'].includes(ext)){setStatus('صيغة الملف غير مدعومة. اختر A26 أو BIN أو ROM أو NES.');return false;}try{const game={id:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random()),name:file.name,size:file.size,blob:file,favorite:false,addedAt:Date.now()};await storeGame(game);if(launch){await renderLibrary();setStatus('تمت إضافة '+file.name+' إلى مكتبتك.');await launchRom(file,file.name,game.id);}return true;}catch(err){setStatus('لم نتمكن من حفظ اللعبة: '+err.message);return false;}}
+async function addRomFile(file,{launch=true,system=null}={}){if(!file)return false;const ext=file.name.split('.').pop().toLowerCase();system=system||({a26:'atari',rom:'atari',nes:'nes',gb:'gb',gbc:'gbc',gba:'gba',md:'genesis',gen:'genesis',smd:'genesis'}[ext]||'atari');const allowed={atari:['a26','bin','rom'],nes:['nes'],gb:['gb'],gbc:['gbc'],gba:['gba'],genesis:['md','gen','smd','bin']};if(!allowed[system]?.includes(ext)){setStatus('امتداد الملف لا يطابق المنصة المختارة.');return false;}try{const game={id:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random()),name:file.name,size:file.size,blob:file,system,favorite:false,addedAt:Date.now()};await storeGame(game);if(launch){await renderLibrary();setStatus('تمت إضافة '+file.name+' إلى مكتبتك.');await launchRom(file,file.name,game.id);}return true;}catch(err){setStatus('لم نتمكن من حفظ اللعبة: '+err.message);return false;}}
 document.getElementById('import-many').addEventListener('click',()=>{if(window.NativeFilePicker&&typeof window.NativeFilePicker.postMessage==='function'){setStatus('حدد عدة ملفات ألعاب Atari من المجلد الذي فككت ضغطه…');window.NativeFilePicker.postMessage('pick:atari:multiple');}else{setStatus('الاستيراد المتعدد متاح في نسخة التطبيق المثبتة.');}});
 document.getElementById('import-rom').addEventListener('click',()=>{if(window.NativeFilePicker&&typeof window.NativeFilePicker.postMessage==='function'){setStatus('اختر ملف لعبة Atari من جهازك…');window.NativeFilePicker.postMessage('pick');}else{document.getElementById('rom').click();}});
 document.getElementById('import-nes').addEventListener('click',()=>{if(window.NativeFilePicker&&typeof window.NativeFilePicker.postMessage==='function'){setStatus('اختر ملف لعبة Nintendo NES من جهازك…');window.NativeFilePicker.postMessage('pick:nes');}else{const input=document.getElementById('rom');input.accept='.nes';input.click();input.accept='.a26,.bin,.rom,.nes';}});
-document.getElementById('rom').addEventListener('change',async e=>{await addRomFile(e.target.files[0]);e.target.value='';});
+document.getElementById('rom').addEventListener('change',async e=>{await addRomFile(e.target.files[0],{system:'atari'});e.target.value='';});
+document.querySelectorAll('[data-import-system]').forEach(button=>button.addEventListener('click',()=>{if(window.NativeFilePicker?.postMessage)window.NativeFilePicker.postMessage('pick:platform:'+button.dataset.importSystem);}));
+document.getElementById('library-search').addEventListener('input',renderLibrary);document.getElementById('library-sort').addEventListener('change',renderLibrary);
+['list','grid'].forEach(view=>document.getElementById(view+'-view').addEventListener('click',()=>{localStorage.setItem('atari-library-view',view);document.getElementById('list-view').classList.toggle('active',view==='list');document.getElementById('grid-view').classList.toggle('active',view==='grid');renderLibrary();}));
 document.getElementById('library').addEventListener('click',async e=>{const button=e.target.closest('button[data-action]');if(!button)return;const id=button.dataset.id,action=button.dataset.action;try{const games=await getGames(),game=games.find(g=>g.id===id);if(!game)return;if(action==='play'){await launchRom(game.blob,game.name,game.id);}else if(action==='favorite'){game.favorite=!game.favorite;await storeGame(game);await renderLibrary();}else if(action==='delete'){if(activeGameId===id){await stopCurrentEmulator();document.getElementById('game').innerHTML='<div class="empty"><b>تم حذف اللعبة</b>اختر لعبة أخرى من مكتبتك.</div>';}await removeGame(id);await renderLibrary();await renderFreeGames();setStatus('تم حذف '+game.name+' من مكتبتك.');}}catch(err){setStatus('حدث خطأ أثناء تحديث المكتبة: '+err.message);}});
 document.getElementById('free-games').addEventListener('click',async e=>{const button=e.target.closest('button[data-free]');if(!button)return;const game=FREE_GAMES.find(g=>g.id===button.dataset.free);if(!game)return;button.disabled=true;try{await installFreeGame(game);}catch(err){setStatus('تعذر إضافة اللعبة: '+err.message);button.disabled=false;}});
 // Touch controls: swipe in the play area to hold a direction; a short tap fires.
@@ -261,5 +276,10 @@ document.getElementById('free-games').addEventListener('click',async e=>{const b
  document.addEventListener('visibilitychange',()=>{if(document.hidden)release();});
 })();
 document.getElementById('fullscreen').addEventListener('click',()=>{const t=document.getElementById('game-wrap');if(t.requestFullscreen)t.requestFullscreen();});
+document.querySelectorAll('.virtual-pad [data-key]').forEach(button=>{const key=button.dataset.key;const down=e=>{e.preventDefault();if(!button.dataset.pressed){button.dataset.pressed='1';document.dispatchEvent(new KeyboardEvent('keydown',{key,code:key===' '?'Space':key,bubbles:true}));}};const up=e=>{e.preventDefault();if(button.dataset.pressed){delete button.dataset.pressed;document.dispatchEvent(new KeyboardEvent('keyup',{key,code:key===' '?'Space':key,bubbles:true}));}};button.addEventListener('pointerdown',down);['pointerup','pointercancel','lostpointercapture','pointerleave'].forEach(type=>button.addEventListener(type,up));});
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);}
+document.getElementById('export-backup').addEventListener('click',async()=>{try{const games=await getGames(),items=[];for(const g of games){const bytes=new Uint8Array(await g.blob.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));items.push({id:g.id,name:g.name,size:g.size,system:gameSystem(g),favorite:!!g.favorite,addedAt:g.addedAt,credit:g.credit,license:g.license,licenseUrl:g.licenseUrl,sourceUrl:g.sourceUrl,data:btoa(binary)});}downloadBlob(new Blob([JSON.stringify({format:'Atari2600UltimateBackup',version:1,createdAt:new Date().toISOString(),games:items})],{type:'application/json'}),'atari-ultimate-backup.json');setStatus('تم تصدير '+items.length+' لعبة بنجاح.');}catch(error){setStatus('تعذر إنشاء النسخة الاحتياطية: '+error.message);}});
+document.getElementById('import-backup').addEventListener('click',()=>document.getElementById('backup-file').click());
+document.getElementById('backup-file').addEventListener('change',async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;try{const data=JSON.parse(await file.text());if(data.format!=='Atari2600UltimateBackup'||!Array.isArray(data.games))throw new Error('صيغة النسخة الاحتياطية غير معروفة.');let restored=0;for(const item of data.games){if(!item.name||!item.data)continue;const binary=atob(item.data),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);const blob=new Blob([bytes]);await storeGame({id:item.id||crypto.randomUUID(),name:item.name,size:blob.size,blob,system:item.system||gameSystem(item),favorite:!!item.favorite,addedAt:item.addedAt||Date.now(),credit:item.credit,license:item.license,licenseUrl:item.licenseUrl,sourceUrl:item.sourceUrl});restored++;}await renderLibrary();await renderFreeGames();setStatus('تم استيراد '+restored+' لعبة من النسخة الاحتياطية.');}catch(error){setStatus('تعذر استيراد النسخة الاحتياطية: '+error.message);}});
 (async()=>{try{db=await openDatabase();await renderLibrary();await renderFreeGames();showPage('atari');setStatus('مكتبتك جاهزة للعمل دون اتصال. يمكنك إضافة الألعاب المجانية يدوياً عند توفر الإنترنت.');}catch(e){setStatus('تعذر تهيئة مكتبة الألعاب: '+e.message);document.getElementById('library').innerHTML='<div class="empty-list">تعذر تشغيل مكتبة الألعاب المحلية.</div>';}})();
 </script></body></html>
