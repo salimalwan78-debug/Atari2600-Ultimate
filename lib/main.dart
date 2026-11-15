@@ -165,7 +165,6 @@ class _EmulatorHomeState extends State<EmulatorHome> {
       if (result == null || result.files.isEmpty) return;
 
       if (multiple) {
-        var imported = 0;
         var skipped = 0;
         for (final file in result.files) {
           final bytes = file.bytes;
@@ -178,7 +177,6 @@ class _EmulatorHomeState extends State<EmulatorHome> {
           await _controller.runJavaScript(
             'window.receiveNativeRom($encodedName, $encodedData, false);',
           );
-          imported++;
         }
         await _controller.runJavaScript(
           'window.finishNativeBatchImport($skipped);',
