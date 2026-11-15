@@ -59,8 +59,16 @@ jobs:
           tree = ET.parse(path)
           root = tree.getroot()
           android = "{http://schemas.android.com/apk/res/android}"
-          root.set(android + "networkSecurityConfig", "@xml/network_security_config")
+          application = root.find("application")
+          if application is None:
+              raise SystemExit("AndroidManifest.xml has no application element")
+          application.set(android + "networkSecurityConfig", "@xml/network_security_config")
           tree.write(path, encoding="utf-8", xml_declaration=True)
+          # Fail early if the attribute was attached to the wrong manifest node.
+          check = ET.parse(path).getroot()
+          app = check.find("application")
+          if app is None or app.get(android + "networkSecurityConfig") != "@xml/network_security_config":
+              raise SystemExit("Loopback network security config was not applied to <application>")
           print("Configured cleartext access only for the loopback WebView server.")
           PY
       - name: Configure stable Android release signing
