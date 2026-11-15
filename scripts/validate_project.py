@@ -24,10 +24,10 @@ for name in ("loader.js", "emulator.min.js", "emulator.min.css",
              "ar-AR.json", "extract7z.js", "extractzip.js",
              "libunrar.js", "libunrar.wasm", "emulator.css", "version.json", "cores.json"):
     require(name in workflow, f"Build workflow must fetch {name}.")
-for core in ("stella2014", "fceumm", "gambatte", "mgba", "genesis_plus_gx"):
-    for variant in ("-wasm.data", "-legacy-wasm.data"):
-        require(f"{core}{variant}" in workflow,
-                f"Build workflow must fetch {core}{variant}.")
+require("for core in stella2014 fceumm gambatte mgba genesis_plus_gx" in workflow,
+        "Build workflow must download all six-platform EmulatorJS cores.")
+require('file="${core}${variant}-wasm.data"' in workflow,
+        "Build workflow must download both normal and legacy core payloads.")
 for element in ("atari-panel", "nes-panel", "gb-panel", "gbc-panel", "gba-panel", "genesis-panel", "library-panel", "player-panel", "backup-panel"):
     require(f'id="{element}"' in html, f"Missing required UI section: {element}.")
 for marker in ("data-page=\"atari\"", "data-page=\"nes\"", "data-page=\"favorites\""):
