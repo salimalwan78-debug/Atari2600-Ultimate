@@ -1,15 +1,12 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#0b0e14">
-<title>Atari 2600 Ultimate</title>
+<html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b0e14"><title>Atari 2600 Ultimate</title>
 <style>
-:root{color-scheme:dark;--gold:#ffad32;--panel:#171d29;--muted:#9aa6b8}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -15%,#293246 0,#101621 42%,#090c12 100%);color:#f5f7fb;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
-header{padding:22px 18px 14px;text-align:center} .mark{width:54px;height:54px;border-radius:17px;background:linear-gradient(145deg,#ffd27a,#f18a19);display:grid;place-items:center;color:#201306;font-size:29px;margin:0 auto 12px;box-shadow:0 8px 28px #ff9d2438}
-h1{font-size:22px;letter-spacing:1.4px;margin:0;font-weight:900} .sub{color:var(--muted);font-size:12px;margin-top:6px}
+:root{color-scheme:dark;--gold:#ffad32;--muted:#9aa6b8}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% -15%,#293246 0,#101621 42%,#090c12 100%);color:#f5f7fb;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+header{padding:22px 18px 14px;text-align:center}.mark{width:54px;height:54px;border-radius:17px;background:linear-gradient(145deg,#ffd27a,#f18a19);display:grid;place-items:center;color:#201306;font-size:29px;margin:0 auto 12px;box-shadow:0 8px 28px #ff9d2438}
+h1{font-size:22px;letter-spacing:1.4px;margin:0;font-weight:900}.sub{color:var(--muted);font-size:12px;margin-top:6px}
 main{max-width:760px;margin:auto;padding:10px 14px 34px}.panel{background:linear-gradient(145deg,#1a2230,#121823);border:1px solid #ffffff12;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 14px 35px #0003}
 .section-title{font-size:14px;font-weight:800;margin:0 0 12px}.actions{display:flex;gap:9px;flex-wrap:wrap}
 button,.file-label{border:0;border-radius:13px;padding:13px 16px;font-size:14px;font-weight:800;cursor:pointer}
@@ -18,65 +15,33 @@ input[type=file]{display:none}.hint{font-size:12px;color:var(--muted);line-heigh
 #game-wrap{background:#030507;border-radius:16px;overflow:hidden;min-height:210px;display:grid;place-items:center;border:1px solid #ffffff18}
 #game{width:100%;min-height:210px;display:grid;place-items:center}#game canvas{max-width:100%;height:auto!important}
 .empty{text-align:center;color:#8995a8;padding:36px 14px;font-size:13px;line-height:2}.empty b{display:block;color:#e6ebf4;font-size:15px;margin-bottom:5px}
-#status{font-size:12px;color:#aab6c8;margin-top:11px;min-height:18px}
-footer{text-align:center;color:#657187;font-size:11px;padding:6px 12px 24px;line-height:1.8}
+#status{font-size:12px;color:#aab6c8;margin-top:11px;min-height:18px}footer{text-align:center;color:#657187;font-size:11px;padding:6px 12px 24px;line-height:1.8}
 .tag{display:inline-block;color:#ffc15a;background:#ffad3215;border:1px solid #ffad3230;padding:4px 9px;border-radius:20px;font-size:10px;margin-top:9px}
 @media(min-width:600px){header{padding-top:30px}main{padding-top:16px}#game{min-height:340px}}
-</style>
-</head>
-<body>
+</style></head><body>
 <header><div class="mark">✦</div><h1>ATARI 2600 ULTIMATE</h1><div class="sub">عُد إلى العصر الذهبي لألعاب الفيديو</div><span class="tag">ATARI 2600 · STELLA CORE</span></header>
 <main>
-<section class="panel">
-<h2 class="section-title">🎮 مكتبة الألعاب</h2>
-<div class="actions">
-<label class="file-label primary" for="rom">＋ اختر لعبة من جهازك</label>
-<input id="rom" type="file" accept=".a26,.bin,.rom,.zip,application/octet-stream">
-<button class="secondary" id="fullscreen">ملء الشاشة</button>
-</div>
+<section class="panel"><h2 class="section-title">🎮 مكتبة الألعاب</h2><div class="actions">
+<label class="file-label primary" for="rom">＋ اختر لعبة من جهازك</label><input id="rom" type="file" accept=".a26,.bin,.rom,.zip,application/octet-stream">
+<button class="secondary" id="fullscreen">ملء الشاشة</button></div>
 <p class="hint">اختر ملف لعبة Atari 2600 بصيغة مثل A26 أو BIN أو ROM. لا يتضمن التطبيق ملفات ألعاب تجارية؛ استخدم ألعابك التي تملك حق استخدامها.</p>
-<div id="status" aria-live="polite">المحاكي جاهز. اختر ملف لعبة للبدء.</div>
-</section>
-<section class="panel">
-<h2 class="section-title">🕹️ شاشة اللعب</h2>
-<div id="game-wrap"><div id="game"><div class="empty"><b>جاهز للانطلاق؟</b>اختر لعبة من مكتبتك لتظهر هنا وتبدأ المغامرة.</div></div></div>
-</section>
-<section class="panel">
-<h2 class="section-title">⌨️ التحكم</h2>
-<p class="hint">يدعم المحاكي أزرار اللمس التي يوفرها EmulatorJS، كما يمكن استخدام لوحة مفاتيح خارجية عند توفرها. اتجاهات الحركة للأسهم، وزر الإطلاق للمسافة، وEnter لإعادة بدء اللعبة، وV للاختيار.</p>
-</section>
-</main>
-<footer>ATARI 2600 ULTIMATE<br>مشروع مستقل يستخدم EmulatorJS · Stella 2014<br>الألعاب غير مرفقة ويختارها المستخدم من جهازه.</footer>
+<div id="status" aria-live="polite">المحاكي جاهز. اختر ملف لعبة للبدء.</div></section>
+<section class="panel"><h2 class="section-title">🕹️ شاشة اللعب</h2><div id="game-wrap"><div id="game"><div class="empty"><b>جاهز للانطلاق؟</b>اختر لعبة من مكتبتك لتظهر هنا وتبدأ المغامرة.</div></div></div></section>
+<section class="panel"><h2 class="section-title">⌨️ التحكم</h2><p class="hint">اتجاهات الحركة للأسهم، وزر الإطلاق للمسافة، وEnter لإعادة بدء اللعبة، وV للاختيار. يوفر المحاكي عناصر تحكم لمسية على الشاشة.</p></section>
+</main><footer>ATARI 2600 ULTIMATE<br>مشروع مستقل يستخدم EmulatorJS · Stella 2014<br>الألعاب غير مرفقة ويختارها المستخدم من جهازه.</footer>
 <script>
-const statusEl=document.getElementById('status');
-const romInput=document.getElementById('rom');
-let currentUrl=null;
+const statusEl=document.getElementById('status');let currentUrl=null;
 function setStatus(message){statusEl.textContent=message;}
-function launchRom(file){
- if(!file)return;
- if(currentUrl)URL.revokeObjectURL(currentUrl);
- currentUrl=URL.createObjectURL(file);
- document.getElementById('game').innerHTML='';
- setStatus('جارٍ تحميل '+file.name+'…');
- window.EJS_player='#game';
- window.EJS_core='atari2600';
- window.EJS_gameUrl=currentUrl;
- window.EJS_gameName=file.name.replace(/\.[^.]+$/,'');
- window.EJS_pathtodata='https://cdn.emulatorjs.org/stable/data/';
- window.EJS_startOnLoaded=true;
- window.EJS_color='#ffad32';
- window.EJS_backgroundColor='#030507';
- window.EJS_Buttons={};
- const old=document.getElementById('ejs-loader');if(old)old.remove();
- const script=document.createElement('script');script.id='ejs-loader';script.src=window.EJS_pathtodata+'loader.js';
- script.onload=()=>setStatus('تم تحميل المحاكي. استمتع باللعب!');
- script.onerror=()=>setStatus('تعذر تحميل ملفات المحاكي. تحقق من اتصال الإنترنت ثم أعد اختيار اللعبة.');
- document.body.appendChild(script);
-}
-romInput.addEventListener('change',e=>launchRom(e.target.files[0]));
-document.getElementById('fullscreen').addEventListener('click',()=>{
- const target=document.getElementById('game-wrap');
- if(target.requestFullscreen)target.requestFullscreen();
-});
-</script>
-</body></html>
+function launchRom(file){if(!file)return;if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=URL.createObjectURL(file);
+document.getElementById('game').innerHTML='';setStatus('جارٍ تحميل '+file.name+'…');
+window.EJS_player='#game';window.EJS_core='atari2600';window.EJS_gameUrl=currentUrl;
+window.EJS_gameName=file.name.replace(/\.[^.]+$/,'');window.EJS_pathtodata='https://cdn.emulatorjs.org/stable/data/';
+window.EJS_startOnLoaded=true;window.EJS_color='#ffad32';window.EJS_backgroundColor='#030507';
+const old=document.getElementById('ejs-loader');if(old)old.remove();
+const script=document.createElement('script');script.id='ejs-loader';script.src=window.EJS_pathtodata+'loader.js';
+script.onload=()=>setStatus('تم تحميل ملفات المحاكي. استمتع باللعب!');
+script.onerror=()=>setStatus('تعذر تحميل ملفات المحاكي. تحقق من اتصال الإنترنت ثم أعد اختيار اللعبة.');
+document.body.appendChild(script);}
+document.getElementById('rom').addEventListener('change',e=>launchRom(e.target.files[0]));
+document.getElementById('fullscreen').addEventListener('click',()=>{const t=document.getElementById('game-wrap');if(t.requestFullscreen)t.requestFullscreen();});
+</script></body></html>
