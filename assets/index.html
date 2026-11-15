@@ -142,7 +142,64 @@ function belongsToPage(game,page){
 async function renderLibrary(){const host=document.getElementById('library');try{const allGames=await getGames();const games=allGames.filter(g=>belongsToPage(g,activePage));if(!games.length){const msg=activePage==='favorites'?'لم تضف ألعاباً إلى المفضلة بعد. اضغط ⭐ على أي لعبة لإضافتها هنا.':activePage==='nes'?'مكتبة Nintendo فارغة. استورد ملفات ألعاب NES بصيغة .nes.':'مكتبة Atari فارغة. استورد ألعابك أو أضف ألعاباً مجانية.';host.innerHTML='<div class="empty-list">'+msg+'</div>';return;}host.innerHTML=games.map(g=>'<div class="game-row"><div class="game-info"><div class="game-name">'+safeText(g.name)+'</div><div class="game-meta">'+(g.credit?safeText(g.credit)+' · ':'')+(g.license?safeText(g.license)+' · ':'')+(g.size/1024).toFixed(0)+' KB'+(g.sourceUrl?' · <a href="'+safeText(g.sourceUrl)+'" target="_blank">المصدر</a>':'')+(g.licenseUrl?' · <a href="'+safeText(g.licenseUrl)+'" target="_blank">الترخيص</a>':'')+'</div></div><button class="secondary fav" data-action="favorite" data-id="'+g.id+'" aria-label="المفضلة">'+(g.favorite?'★':'☆')+'</button><button class="primary" data-action="play" data-id="'+g.id+'">تشغيل</button><button class="secondary danger" data-action="delete" data-id="'+g.id+'">حذف</button></div>').join('');}catch(e){host.innerHTML='<div class="empty-list">تعذر قراءة المكتبة على هذا الجهاز.</div>';setStatus('تعذر فتح قاعدة بيانات المكتبة: '+e.message);}}
 async function renderFreeGames(){const host=document.getElementById('free-games');const installed=new Set((await getGames()).map(g=>g.id));host.innerHTML=FREE_GAMES.map(g=>'<div class="catalog-row"><div class="game-info"><div class="game-name">'+safeText(g.name)+'</div><div class="game-meta">'+safeText(g.credit)+' · '+safeText(g.license)+'<br>'+safeText(g.hint)+'<br><a href="'+safeText(g.sourceUrl)+'" target="_blank">المصدر</a> · <a href="'+safeText(g.licenseUrl)+'" target="_blank">الترخيص</a></div></div><button class="secondary" data-free="'+g.id+'" '+(installed.has(g.id)?'disabled':'')+'>'+(installed.has(g.id)?'في المكتبة':'إضافة')+'</button></div>').join('');}
 async function installFreeGame(game,auto=false){const existing=(await getGames()).find(g=>g.id===game.id);if(existing)return;setStatus('جارٍ تنزيل '+game.name+' والتحقق من سلامة الملف…');const response=await fetch(game.url);if(!response.ok)throw new Error('تعذر تنزيل '+game.name+' (HTTP '+response.status+')');const blob=await response.blob();const digest=await crypto.subtle.digest('SHA-256',await blob.arrayBuffer());const hash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');if(hash!==game.sha256)throw new Error('فشل التحقق من سلامة ملف '+game.name+'؛ لم تتم إضافته.');await storeGame({id:game.id,name:game.name+'.bin',size:blob.size,blob,favorite:false,addedAt:Date.now(),credit:game.credit,license:game.license,licenseUrl:game.licenseUrl,sourceUrl:game.sourceUrl});await renderLibrary();await renderFreeGames();setStatus('تمت إضافة '+game.name+' بنجاح إلى مكتبتك.');}
-async function launchRom(file,name){if(!file)return;try{if(typeof window.EJS_terminate==='function')await window.EJS_terminate();}catch(e){console.warn('Previous emulator cleanup:',e);}if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=URL.createObjectURL(file);document.getElementById('game').innerHTML='';setStatus('جارٍ تحميل '+name+'…');window.EJS_player='#game';window.EJS_core=name.toLowerCase().endsWith('.nes')?'nes':'atari2600';window.EJS_gameUrl=currentUrl;window.EJS_gameName=name.replace(/\.[^.]+$/,'');window.EJS_pathtodata='emulatorjs/data/';window.EJS_startOnLoaded=true;window.EJS_threads=false;window.EJS_gameParentUrl='';window.EJS_color='#ffad32';window.EJS_backgroundColor='#030507';const old=document.getElementById('ejs-loader');if(old)old.remove();const script=document.createElement('script');script.id='ejs-loader';script.src=window.EJS_pathtodata+'loader.js';script.onload=()=>setStatus('تم تحميل المشغّل المحلي. جارٍ تهيئة نواة اللعبة…');script.onerror=()=>setStatus('تعذر تحميل مشغّل المحاكي من موارد التطبيق المحلية. تحقق من ملفات assets/emulatorjs/data.');document.body.appendChild(script);}
+let launchSequence=0,launchWatchdog=null;
+function reportEmulatorError(message,detail){
+ const readable=String(message||'خطأ غير معروف');
+ console.error('[EmulatorJS]',readable,detail||'');
+ setStatus('تعذر تشغيل اللعبة: '+readable);
+}
+window.addEventListener('error',event=>{
+ if(event&&event.message)reportEmulatorError(event.message,event.filename+':'+event.lineno);
+});
+window.addEventListener('unhandledrejection',event=>{
+ reportEmulatorError(event.reason&&event.reason.message?event.reason.message:event.reason);
+});
+async function stopCurrentEmulator(){
+ if(launchWatchdog){clearTimeout(launchWatchdog);launchWatchdog=null;}
+ try{
+  if(typeof window.EJS_terminate==='function')await window.EJS_terminate();
+ }catch(error){console.warn('EmulatorJS termination warning:',error);}
+ const old=document.getElementById('ejs-loader');
+ if(old){old.onerror=null;old.onload=null;old.remove();}
+ const game=document.getElementById('game');
+ if(game)game.replaceChildren();
+ if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}
+}
+async function launchRom(file,name){
+ if(!file)return;
+ const sequence=++launchSequence;
+ setStatus('جارٍ تجهيز '+name+'…');
+ try{
+  await stopCurrentEmulator();
+  if(sequence!==launchSequence)return;
+  currentUrl=URL.createObjectURL(file);
+  const game=document.getElementById('game');
+  game.innerHTML='<div class="empty"><b>جارٍ تشغيل اللعبة…</b>يتم تحميل ملفات المحاكي المحلية.</div>';
+  window.EJS_player='#game';
+  window.EJS_core=name.toLowerCase().endsWith('.nes')?'nes':'atari2600';
+  window.EJS_gameUrl=currentUrl;
+  window.EJS_gameName=name.replace(/\.[^.]+$/,'');
+  window.EJS_pathtodata='/assets/emulatorjs/data/';
+  window.EJS_startOnLoaded=true;
+  window.EJS_threads=false;
+  window.EJS_forceLegacyCores=false;
+  window.EJS_gameParentUrl='';
+  window.EJS_color=getComputedStyle(document.documentElement).getPropertyValue('--gold').trim()||'#ffad32';
+  window.EJS_backgroundColor='#030507';
+  window.EJS_language='ar';
+  window.EJS_onGameStart=()=>{if(sequence===launchSequence){if(launchWatchdog){clearTimeout(launchWatchdog);launchWatchdog=null;}setStatus('اللعبة تعمل الآن: '+name);}};
+  window.EJS_ready=()=>{if(sequence===launchSequence)setStatus('تم تحميل المحاكي. إذا لم تبدأ اللعبة، المس شاشة اللعب لبدء التشغيل.');};
+  window.EJS_onExit=()=>{if(sequence===launchSequence)setStatus('تم إغلاق اللعبة. اختر لعبة أخرى للتشغيل.');};
+  window.EJS_askBeforeExit=false;
+  const script=document.createElement('script');
+  script.id='ejs-loader';
+  script.src=window.EJS_pathtodata+'loader.js';
+  script.onload=()=>{if(sequence===launchSequence)setStatus('تم تحميل المشغّل. جارٍ تحميل النواة واللعبة…');};
+  script.onerror=()=>{if(sequence===launchSequence)reportEmulatorError('تعذر تحميل loader.js من موارد التطبيق المحلية.');};
+  launchWatchdog=setTimeout(()=>{if(sequence===launchSequence)reportEmulatorError('استغرق تحميل النواة أكثر من 45 ثانية. تحقق من موارد المحاكي أو توافق اللعبة.');},45000);
+  document.body.appendChild(script);
+ }catch(error){if(sequence===launchSequence)reportEmulatorError(error.message||error);}
+}
 async function addRomFile(file,{launch=true}={}){if(!file)return false;const ext=file.name.split('.').pop().toLowerCase();if(!['a26','bin','rom','nes'].includes(ext)){setStatus('صيغة الملف غير مدعومة. اختر A26 أو BIN أو ROM أو NES.');return false;}try{const game={id:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random()),name:file.name,size:file.size,blob:file,favorite:false,addedAt:Date.now()};await storeGame(game);if(launch){await renderLibrary();setStatus('تمت إضافة '+file.name+' إلى مكتبتك.');await launchRom(file,file.name);}return true;}catch(err){setStatus('لم نتمكن من حفظ اللعبة: '+err.message);return false;}}
 document.getElementById('import-many').addEventListener('click',()=>{if(window.NativeFilePicker&&typeof window.NativeFilePicker.postMessage==='function'){setStatus('حدد عدة ملفات ألعاب Atari من المجلد الذي فككت ضغطه…');window.NativeFilePicker.postMessage('pick:atari:multiple');}else{setStatus('الاستيراد المتعدد متاح في نسخة التطبيق المثبتة.');}});
 document.getElementById('import-rom').addEventListener('click',()=>{if(window.NativeFilePicker&&typeof window.NativeFilePicker.postMessage==='function'){setStatus('اختر ملف لعبة Atari من جهازك…');window.NativeFilePicker.postMessage('pick');}else{document.getElementById('rom').click();}});
