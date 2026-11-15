@@ -181,7 +181,7 @@ class _EmulatorHomeState extends State<EmulatorHome> {
           imported++;
         }
         await _controller.runJavaScript(
-          'window.finishNativeBatchImport();',
+          'window.finishNativeBatchImport($skipped);',
         );
       } else {
         final file = result.files.single;
