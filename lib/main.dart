@@ -176,12 +176,12 @@ class _EmulatorHomeState extends State<EmulatorHome> {
           final encodedName = jsonEncode(file.name);
           final encodedData = jsonEncode(base64Encode(bytes));
           await _controller.runJavaScript(
-            'await window.receiveNativeRom($encodedName, $encodedData, false);',
+            'window.receiveNativeRom($encodedName, $encodedData, false);',
           );
           imported++;
         }
         await _controller.runJavaScript(
-          'await window.finishNativeBatchImport($imported, $skipped);',
+          'window.finishNativeBatchImport();',
         );
       } else {
         final file = result.files.single;
@@ -193,7 +193,7 @@ class _EmulatorHomeState extends State<EmulatorHome> {
         final encodedName = jsonEncode(file.name);
         final encodedData = jsonEncode(base64Encode(bytes));
         await _controller.runJavaScript(
-          'await window.receiveNativeRom($encodedName, $encodedData);',
+          'window.receiveNativeRom($encodedName, $encodedData);',
         );
       }
     } catch (error) {
