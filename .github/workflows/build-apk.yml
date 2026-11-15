@@ -185,10 +185,18 @@ jobs:
           CORE_DIR="$DATA_DIR/cores"
           SRC_DIR="$DATA_DIR/src"
           LOCALE_DIR="$DATA_DIR/localization"
-          mkdir -p "$CORE_DIR" "$SRC_DIR" "$LOCALE_DIR"
+          COMPRESSION_DIR="$DATA_DIR/compression"
+          mkdir -p "$CORE_DIR" "$SRC_DIR" "$LOCALE_DIR" "$COMPRESSION_DIR"
           curl --retry 3 --retry-all-errors -fL "$BASE/loader.js" -o "$DATA_DIR/loader.js"
           curl --retry 3 --retry-all-errors -fL "$BASE/emulator.min.js" -o "$DATA_DIR/emulator.min.js"
           curl --retry 3 --retry-all-errors -fL "$BASE/emulator.min.css" -o "$DATA_DIR/emulator.min.css"
+          curl --retry 3 --retry-all-errors -fL "$BASE/emulator.css" -o "$DATA_DIR/emulator.css"
+          curl --retry 3 --retry-all-errors -fL "$BASE/version.json" -o "$DATA_DIR/version.json"
+          # Bundle every official compression helper and its WebAssembly dependency.
+          for file in extract7z.js extractzip.js libunrar.js libunrar.wasm; do
+            curl --retry 3 --retry-all-errors -fL "$BASE/compression/$file" -o "$COMPRESSION_DIR/$file"
+            test -s "$COMPRESSION_DIR/$file"
+          done
           # The stable loader/runtime also requests these support scripts from data/src/.
           for file in GameManager.js compression.js emulator.js gamepad.js nipplejs.js shaders.js socket.io.min.js storage.js; do
             curl --retry 3 --retry-all-errors -fL "$BASE/src/$file" -o "$SRC_DIR/$file"
@@ -205,7 +213,7 @@ jobs:
               test -s "$CORE_DIR/$file"
             done
           done
-          for file in loader.js emulator.min.js emulator.min.css; do test -s "$DATA_DIR/$file"; done
+          for file in loader.js emulator.min.js emulator.min.css emulator.css version.json; do test -s "$DATA_DIR/$file"; done
           echo "Verified EmulatorJS runtime, support scripts, Arabic localization and Atari/NES core packs."
           find "$DATA_DIR" -type f -printf '%P %s bytes\\n' | sort
       - name: Set app version
@@ -242,6 +250,11 @@ jobs:
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/loader.js' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/emulator.min.js' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/emulator.min.css' /tmp/apk-files.txt
+          grep -q 'assets/flutter_assets/assets/emulatorjs/data/emulator.css' /tmp/apk-files.txt
+          grep -q 'assets/flutter_assets/assets/emulatorjs/data/version.json' /tmp/apk-files.txt
+          for file in extract7z.js extractzip.js libunrar.js libunrar.wasm; do
+            grep -q "assets/flutter_assets/assets/emulatorjs/data/compression/$file" /tmp/apk-files.txt
+          done
           for file in GameManager.js compression.js emulator.js gamepad.js nipplejs.js shaders.js socket.io.min.js storage.js; do
             grep -q "assets/flutter_assets/assets/emulatorjs/data/src/$file" /tmp/apk-files.txt
           done
