@@ -27,6 +27,16 @@ jobs:
           channel: stable
           flutter-version: "3.38.5"
           cache: true
+      - name: Validate requested app version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$APP_VERSION" =~ ^V([0-9]+)$ ]] || { echo "Use V0, V1, V2..." >&2; exit 1; }
+          INDEX="${BASH_REMATCH[1]}"
+          BUILD_NUMBER=$((INDEX + 5))
+          echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Building $APP_VERSION with Android versionCode $BUILD_NUMBER"
       - name: Generate Android platform
         run: flutter create --platforms=android --org com.atari2600ultimate .
       - name: Configure stable Android release signing
@@ -39,6 +49,7 @@ jobs:
           set -euo pipefail
           test -n "$ANDROID_KEYSTORE_BASE64"
           echo "$ANDROID_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > android/app/atari-release.jks
+          test -s android/app/atari-release.jks
           cat > android/key.properties <<EOF
           storePassword=$ANDROID_KEYSTORE_PASSWORD
           keyPassword=$ANDROID_KEY_PASSWORD
@@ -46,38 +57,49 @@ jobs:
           storeFile=atari-release.jks
           EOF
           python3 scripts/configure_android_signing.py
-      - name: Download offline EmulatorJS runtime and cores
+      - name: Download pinned offline EmulatorJS runtime and cores
         run: |
           set -euo pipefail
           BASE="https://cdn.emulatorjs.org/nightly/data"
           mkdir -p assets/emulatorjs/data
-          curl -fL "$BASE/loader.js" -o assets/emulatorjs/data/loader.js
-          curl -fL "$BASE/emulator.min.js" -o assets/emulatorjs/data/emulator.min.js
-          curl -fL "$BASE/emulator.min.css" -o assets/emulatorjs/data/emulator.min.css
-          curl -fL "$BASE/cores/stella2014.zip" -o /tmp/stella2014.zip
-          curl -fL "$BASE/cores/fceumm.zip" -o /tmp/fceumm.zip
-          unzip -o /tmp/stella2014.zip -d assets/emulatorjs/data
-          unzip -o /tmp/fceumm.zip -d assets/emulatorjs/data
-          echo "Checking required EmulatorJS runtime files..."
+          curl --retry 3 --retry-all-errors -fL "$BASE/loader.js" -o assets/emulatorjs/data/loader.js
+          curl --retry 3 --retry-all-errors -fL "$BASE/emulator.min.js" -o assets/emulatorjs/data/emulator.min.js
+          curl --retry 3 --retry-all-errors -fL "$BASE/emulator.min.css" -o assets/emulatorjs/data/emulator.min.css
+          curl --retry 3 --retry-all-errors -fL "$BASE/cores/stella2014.zip" -o /tmp/stella2014.zip
+          curl --retry 3 --retry-all-errors -fL "$BASE/cores/fceumm.zip" -o /tmp/fceumm.zip
+          unzip -oq /tmp/stella2014.zip -d assets/emulatorjs/data
+          unzip -oq /tmp/fceumm.zip -d assets/emulatorjs/data
+          echo "Checking runtime and WebAssembly core payloads..."
           test -s assets/emulatorjs/data/loader.js
           test -s assets/emulatorjs/data/emulator.min.js
           test -s assets/emulatorjs/data/emulator.min.css
-          echo "Checking Stella 2014 core payload..."
-          find assets/emulatorjs/data -maxdepth 1 -type f -iname '*stella2014*' -print
-          test -n "$(find assets/emulatorjs/data -maxdepth 1 -type f -iname '*stella2014*' -print -quit)"
-          echo "Checking FCEUmm core payload..."
-          find assets/emulatorjs/data -maxdepth 1 -type f -iname '*fceumm*' -print
-          test -n "$(find assets/emulatorjs/data -maxdepth 1 -type f -iname '*fceumm*' -print -quit)"
-          echo "All emulator runtime/core files are present in the required data directory."
-      - name: Set app version in interface
+          STELLA_WASM="$(find assets/emulatorjs/data -type f -iname '*stella2014*.wasm' -print -quit)"
+          FCEUMM_WASM="$(find assets/emulatorjs/data -type f -iname '*fceumm*.wasm' -print -quit)"
+          test -n "$STELLA_WASM" || { echo "Stella 2014 WASM core missing from archive"; exit 1; }
+          test -n "$FCEUMM_WASM" || { echo "FCEUmm WASM core missing from archive"; exit 1; }
+          echo "Stella: $STELLA_WASM"
+          echo "FCEUmm: $FCEUMM_WASM"
+          find assets/emulatorjs/data -type f -printf '%P %s bytes\n' | sort
+      - name: Set app version
         run: |
           sed -i "s/const APP_VERSION = '[^']*';/const APP_VERSION = '${APP_VERSION}';/" assets/index.html
       - name: Install dependencies
         run: flutter pub get
-      - name: Analyze
-        run: flutter analyze
+      - name: Analyze Dart
+        run: flutter analyze --no-pub
       - name: Build signed release APK
-        run: flutter build apk --release --dart-define=APP_VERSION="${APP_VERSION}"
+        run: flutter build apk --release --build-name=0.0.0 --build-number=${{ steps.version.outputs.build_number }}
+      - name: Verify APK contains offline emulator payload
+        run: |
+          set -euo pipefail
+          APK=build/app/outputs/flutter-apk/app-release.apk
+          test -s "$APK"
+          unzip -l "$APK" > /tmp/apk-files.txt
+          grep -q 'assets/flutter_assets/assets/emulatorjs/data/loader.js' /tmp/apk-files.txt
+          grep -q 'assets/flutter_assets/assets/emulatorjs/data/emulator.min.js' /tmp/apk-files.txt
+          grep -qi 'assets/flutter_assets/assets/emulatorjs/data/.*stella2014.*wasm' /tmp/apk-files.txt
+          grep -qi 'assets/flutter_assets/assets/emulatorjs/data/.*fceumm.*wasm' /tmp/apk-files.txt
+          echo "APK contains loader, EmulatorJS runtime and both WASM cores."
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
