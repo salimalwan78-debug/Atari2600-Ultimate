@@ -204,6 +204,9 @@ jobs:
           done
           # The app UI is Arabic; bundle its locale so the runtime never reaches the network.
           curl --retry 3 --retry-all-errors -fL "$BASE/localization/ar-AR.json" -o "$LOCALE_DIR/ar-AR.json"
+          # Core registry shipped by the official stable CDN.
+          curl --retry 3 --retry-all-errors -fL "$BASE/cores/cores.json" -o "$CORE_DIR/cores.json"
+          test -s "$CORE_DIR/cores.json"
           # EmulatorJS resolves Atari 2600 to Stella 2014 and NES to FCEUmm.
           # Keep both normal and legacy single-thread data packs available offline.
           for core in stella2014 fceumm; do
@@ -260,6 +263,7 @@ jobs:
           done
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/localization/ar-AR.json' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/index.html' /tmp/apk-files.txt
+          grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/cores.json' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/stella2014-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/stella2014-legacy-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/fceumm-wasm.data' /tmp/apk-files.txt
