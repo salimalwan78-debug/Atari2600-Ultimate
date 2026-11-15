@@ -34,8 +34,23 @@ input[type=file]{display:none}.hint{font-size:12px;color:var(--muted);line-heigh
 #status{padding:10px 12px;background:#0d1724;border-radius:12px;border:1px solid #ffffff0d}
 .tag{font-weight:800;letter-spacing:.5px}
 @media(min-width:600px){.bottom-nav{position:static}#game-wrap,#game{min-height:380px}}
+
+:root[data-theme="neon"]{--gold:#c77dff;--muted:#a7a1c4}
+:root[data-theme="ocean"]{--gold:#43c6e8;--muted:#9ab6c7}
+:root[data-theme="neon"] body{background:radial-gradient(circle at 50% -15%,#302044 0,#151223 45%,#090c12 100%)}
+:root[data-theme="ocean"] body{background:radial-gradient(circle at 50% -15%,#16394a 0,#101a28 45%,#080d13 100%)}
+:root[data-theme="neon"] .primary{background:linear-gradient(135deg,#e3b5ff,#a64df0);color:#1b0927}
+:root[data-theme="ocean"] .primary{background:linear-gradient(135deg,#8cecff,#249ecb);color:#041b25}
+:root[data-theme="neon"] .nav-item.active{background:linear-gradient(135deg,#e3b5ff,#a64df0);color:#1b0927}
+:root[data-theme="ocean"] .nav-item.active{background:linear-gradient(135deg,#8cecff,#249ecb);color:#041b25}
+.theme-switch{display:flex;justify-content:center;gap:10px;margin-top:13px}
+.theme-dot{width:24px;height:24px;padding:0;border-radius:50%;border:2px solid #ffffff55;box-shadow:0 0 0 3px transparent}
+.theme-dot.active{box-shadow:0 0 0 3px #ffffff44;transform:scale(1.12)}
+.theme-dot.gold{background:linear-gradient(135deg,#ffd27a,#ed8413)}
+.theme-dot.neon{background:linear-gradient(135deg,#e3b5ff,#a64df0)}
+.theme-dot.ocean{background:linear-gradient(135deg,#8cecff,#249ecb)}
 </style></head><body>
-<header><div class="mark">✦</div><h1>ATARI 2600 ULTIMATE</h1><div class="sub">عُد إلى العصر الذهبي لألعاب الفيديو</div><span class="tag">ATARI 2600 · STELLA CORE</span></header>
+<header><div class="mark">✦</div><h1>ATARI 2600 ULTIMATE</h1><div class="sub">عُد إلى العصر الذهبي لألعاب الفيديو</div><span class="tag">ATARI 2600 · STELLA CORE</span><div class="theme-switch" aria-label="اختيار الثيم"><button data-theme="gold" class="theme-dot gold active" aria-label="الثيم الذهبي"></button><button data-theme="neon" class="theme-dot neon" aria-label="الثيم النيون"></button><button data-theme="ocean" class="theme-dot ocean" aria-label="الثيم الأزرق"></button></div></header>
 <nav class="bottom-nav" aria-label="أقسام مكتبة الألعاب">
 <button class="nav-item active" data-page="atari"><span>🕹️</span><b>Atari</b></button>
 <button class="nav-item" data-page="nes"><span>🎮</span><b>Nintendo</b></button>
@@ -56,6 +71,14 @@ input[type=file]{display:none}.hint{font-size:12px;color:var(--muted);line-heigh
 <script>
 const APP_VERSION = 'V0';
 document.addEventListener('DOMContentLoaded',()=>{const badge=document.querySelector('header .tag');if(badge)badge.textContent+=' · '+APP_VERSION;});
+
+document.querySelectorAll('.theme-dot').forEach(btn=>btn.addEventListener('click',()=>{
+ const theme=btn.dataset.theme;document.documentElement.dataset.theme=theme;
+ document.querySelectorAll('.theme-dot').forEach(x=>x.classList.toggle('active',x===btn));
+ try{localStorage.setItem('atari-theme',theme);}catch(e){}
+}));
+try{const savedTheme=localStorage.getItem('atari-theme');if(savedTheme){document.documentElement.dataset.theme=savedTheme;document.querySelectorAll('.theme-dot').forEach(x=>x.classList.toggle('active',x.dataset.theme===savedTheme));}}catch(e){}
+
 const statusEl=document.getElementById('status');let currentUrl=null,db;
 const FREE_GAMES=[
 { id:'free-2048-2600',name:'2048 2600',file:'2048-2600.bin',url:'https://raw.githubusercontent.com/chesterbr/2048-2600/main/2048.bin',sha256:'c85dc2204299b0a29209d3f80ae112678c171dab216719593625647d2436f1e1',credit:'Carlos Duarte do Nascimento (Chester), 2014',license:'MIT License',licenseUrl:'https://raw.githubusercontent.com/chesterbr/2048-2600/main/LICENSE',sourceUrl:'https://github.com/chesterbr/2048-2600',hint:'حرّك القطع باستخدام عصا التحكم واجمع الأرقام حتى تصل إلى 2048.'},
