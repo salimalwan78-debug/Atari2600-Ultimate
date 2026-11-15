@@ -63,13 +63,21 @@ jobs:
           if application is None:
               raise SystemExit("AndroidManifest.xml has no application element")
           application.set(android + "networkSecurityConfig", "@xml/network_security_config")
+          # The embedded loopback HTTP server needs INTERNET permission even
+          # though it never opens a remote connection for emulator assets.
+          permission_name = "android.permission.INTERNET"
+          if not any(item.get(android + "name") == permission_name for item in root.findall("uses-permission")):
+              permission = ET.Element("uses-permission")
+              permission.set(android + "name", permission_name)
+              root.insert(0, permission)
           tree.write(path, encoding="utf-8", xml_declaration=True)
-          # Fail early if the attribute was attached to the wrong manifest node.
+          # Fail early if either setting is missing or attached to the wrong node.
           check = ET.parse(path).getroot()
           app = check.find("application")
-          if app is None or app.get(android + "networkSecurityConfig") != "@xml/network_security_config":
-              raise SystemExit("Loopback network security config was not applied to <application>")
-          print("Configured cleartext access only for the loopback WebView server.")
+          has_internet = any(item.get(android + "name") == permission_name for item in check.findall("uses-permission"))
+          if app is None or app.get(android + "networkSecurityConfig") != "@xml/network_security_config" or not has_internet:
+              raise SystemExit("Loopback server manifest configuration is incomplete")
+          print("Configured loopback-only cleartext access and INTERNET permission for the embedded asset server.")
           PY
       - name: Configure stable Android release signing
         env:
