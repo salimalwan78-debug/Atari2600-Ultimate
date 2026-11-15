@@ -38,6 +38,19 @@ void main() {
     expect(html, contains('await storeGame(game)'));
   });
 
+  test('active game deletion stops the emulator and clears touch state', () {
+    expect(html, contains('if(activeGameId===id){await stopCurrentEmulator();'));
+    expect(html, contains('activeGameId=null'));
+    expect(html, contains('window.releaseTouchInput=release'));
+  });
+
+  test('touch controls dispatch keyboard events through document', () {
+    expect(html, contains("document.dispatchEvent(new KeyboardEvent('keydown'"));
+    expect(html, contains("document.dispatchEvent(new KeyboardEvent('keyup'"));
+    expect(html, contains("'Space'"));
+    expect(html, contains('lostpointercapture'));
+  });
+
   test('favorites and theme persistence are present', () {
     expect(html, contains("game.favorite=!game.favorite"));
     expect(html, contains("localStorage.setItem('atari-theme',theme)"));
