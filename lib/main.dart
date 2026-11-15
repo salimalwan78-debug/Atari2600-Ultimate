@@ -52,13 +52,9 @@ class _EmulatorHomeState extends State<EmulatorHome> {
       ..addJavaScriptChannel(
         'NativeFilePicker',
         onMessageReceived: (message) {
-          if (message.message == 'pick' ||
-              message.message == 'pick:nes' ||
-              message.message == 'pick:atari:multiple') {
-            _pickRomFile(
-              nesOnly: message.message == 'pick:nes',
-              multiple: message.message == 'pick:atari:multiple',
-            );
+          if (message.message == 'pick' || message.message == 'pick:nes' || message.message == 'pick:atari:multiple' || message.message.startsWith('pick:platform:')) {
+            final platform = message.message.startsWith('pick:platform:') ? message.message.substring('pick:platform:'.length) : null;
+            _pickRomFile(nesOnly: message.message == 'pick:nes', multiple: message.message == 'pick:atari:multiple', platform: platform);
           }
         },
       )
@@ -156,15 +152,13 @@ class _EmulatorHomeState extends State<EmulatorHome> {
     return 'application/octet-stream';
   }
 
-  Future<void> _pickRomFile({bool nesOnly = false, bool multiple = false}) async {
+  Future<void> _pickRomFile({bool nesOnly = false, bool multiple = false, String? platform}) async {
     if (_pickingFile) return;
     _pickingFile = true;
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: nesOnly
-            ? const ['nes']
-            : const ['a26', 'bin', 'rom'],
+        allowedExtensions: platform == 'gb' ? const ['gb'] : platform == 'gbc' ? const ['gbc'] : platform == 'gba' ? const ['gba'] : platform == 'genesis' ? const ['md', 'gen', 'smd', 'bin'] : nesOnly ? const ['nes'] : const ['a26', 'bin', 'rom'],
         allowMultiple: multiple,
         withData: true,
       );
@@ -181,7 +175,7 @@ class _EmulatorHomeState extends State<EmulatorHome> {
           final encodedName = jsonEncode(file.name);
           final encodedData = jsonEncode(base64Encode(bytes));
           await _controller.runJavaScript(
-            'window.receiveNativeRom($encodedName, $encodedData, false);',
+            'window.receiveNativeRom($encodedName, $encodedData, false, ${jsonEncode(platform ?? 'atari')});',
           );
         }
         await _controller.runJavaScript(
@@ -197,7 +191,7 @@ class _EmulatorHomeState extends State<EmulatorHome> {
         final encodedName = jsonEncode(file.name);
         final encodedData = jsonEncode(base64Encode(bytes));
         await _controller.runJavaScript(
-          'window.receiveNativeRom($encodedName, $encodedData);',
+          'window.receiveNativeRom($encodedName, $encodedData, true, ${jsonEncode(platform ?? (nesOnly ? 'nes' : 'atari'))});',
         );
       }
     } catch (error) {

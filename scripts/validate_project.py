@@ -24,14 +24,22 @@ for name in ("loader.js", "emulator.min.js", "emulator.min.css",
              "ar-AR.json", "extract7z.js", "extractzip.js",
              "libunrar.js", "libunrar.wasm", "emulator.css", "version.json", "cores.json"):
     require(name in workflow, f"Build workflow must fetch {name}.")
-for core in ("stella2014", "fceumm"):
-    for variant in ("-wasm.data", "-legacy-wasm.data"):
-        require(f"{core}{variant}" in workflow,
-                f"Build workflow must fetch {core}{variant}.")
-for element in ("atari-panel", "nes-panel", "library-panel", "player-panel"):
+require("for core in stella2014 fceumm gambatte mgba genesis_plus_gx" in workflow,
+        "Build workflow must download all six-platform EmulatorJS cores.")
+require('file="${core}${variant}-wasm.data"' in workflow,
+        "Build workflow must download both normal and legacy core payloads.")
+for element in ("atari-panel", "nes-panel", "gb-panel", "gbc-panel", "gba-panel", "genesis-panel", "library-panel", "player-panel", "backup-panel"):
     require(f'id="{element}"' in html, f"Missing required UI section: {element}.")
 for marker in ("data-page=\"atari\"", "data-page=\"nes\"", "data-page=\"favorites\""):
     require(marker in html, f"Missing navigation page marker: {marker}.")
+for marker in ('data-page="gb"', 'data-page="gbc"', 'data-page="gba"', 'data-page="genesis"', 'data-import-system="gb"', 'data-import-system="gbc"', 'data-import-system="gba"', 'data-import-system="genesis"'):
+    require(marker in html, f"Missing platform/import marker: {marker}.")
+for feature in ("export-backup", "import-backup", "library-search", "grid-view", "data-key=" + '"ArrowUp"', "saveState:true", "loadState:true"):
+    require(feature in html, f"Missing requested feature: {feature}.")
+require("window.EJS_core=({atari:'atari2600',nes:'nes',gb:'gb',gbc:'gb',gba:'gba',genesis:'segaMD'})[resolvedSystem]" in html,
+        "Game Boy and Game Boy Color must both route to the documented GB system.")
+require("window.receiveNativeRom=function(name,base64,launch=true,system=null)" in html,
+        "Native import bridge must preserve the selected platform.")
 require("EJS_pathtodata='/assets/emulatorjs/data/'" in html,
         "EmulatorJS data path must point to the bundled local asset server.")
 require("window.EJS_ready=" in html and "window.EJS_onGameStart=" in html,

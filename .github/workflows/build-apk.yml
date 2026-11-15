@@ -207,9 +207,9 @@ jobs:
           # Core registry shipped by the official stable CDN.
           curl --retry 3 --retry-all-errors -fL "$BASE/cores/cores.json" -o "$CORE_DIR/cores.json"
           test -s "$CORE_DIR/cores.json"
-          # EmulatorJS resolves Atari 2600 to Stella 2014 and NES to FCEUmm.
-          # Keep both normal and legacy single-thread data packs available offline.
-          for core in stella2014 fceumm; do
+          # Bundle cores for Atari 2600, NES, Game Boy/Color, GBA and Sega Genesis.
+          # GB and GBC share Gambatte; Genesis uses Genesis Plus GX.
+          for core in stella2014 fceumm gambatte mgba genesis_plus_gx; do
             for variant in "" "-legacy"; do
               file="${core}${variant}-wasm.data"
               curl --retry 3 --retry-all-errors -fL "$BASE/cores/$file" -o "$CORE_DIR/$file"
@@ -217,7 +217,7 @@ jobs:
             done
           done
           for file in loader.js emulator.min.js emulator.min.css emulator.css version.json; do test -s "$DATA_DIR/$file"; done
-          echo "Verified EmulatorJS runtime, support scripts, Arabic localization and Atari/NES core packs."
+          echo "Verified EmulatorJS runtime, support scripts, Arabic localization and all six platform core packs."
           find "$DATA_DIR" -type f -printf '%P %s bytes\\n' | sort
       - name: Set app version
         run: |
@@ -268,7 +268,11 @@ jobs:
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/stella2014-legacy-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/fceumm-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/fceumm-legacy-wasm.data' /tmp/apk-files.txt
-          echo "APK contains index, loader, runtime, support scripts, Arabic locale and all selected core data variants."
+          for core in gambatte mgba genesis_plus_gx; do
+            grep -q "assets/flutter_assets/assets/emulatorjs/data/cores/${core}-wasm.data" /tmp/apk-files.txt
+            grep -q "assets/flutter_assets/assets/emulatorjs/data/cores/${core}-legacy-wasm.data" /tmp/apk-files.txt
+          done
+          echo "APK contains index, loader, runtime, support scripts, Arabic locale and all six platform core data variants."
           SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
           test -n "$SDK_ROOT"
           APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner | sort -V | tail -n 1)"

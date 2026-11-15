@@ -5,9 +5,16 @@ Arabic-first Android retro game library with a local EmulatorJS runtime.
 ## Platforms
 - Atari 2600 using the Stella 2014 core.
 - Nintendo Entertainment System (NES) using the FCEUmm core.
+- Game Boy and Game Boy Color using Gambatte.
+- Game Boy Advance using mGBA.
+- Sega Genesis / Mega Drive using Genesis Plus GX.
 
 ## Features
-- Separate Atari, Nintendo NES, and Favorites pages.
+- Separate pages for Atari 2600, NES, Game Boy, Game Boy Color, Game Boy Advance, Sega Genesis, and Favorites.
+- Search, sorting, and switchable list/grid library layouts.
+- Swipe controls plus independent on-screen directional and fire buttons.
+- Local JSON backup and restore for imported ROMs and favorites.
+- EmulatorJS save-state and load-state controls.
 - Three persistent visual themes.
 - Import personal Atari ROMs (.a26, .bin, .rom) and NES ROMs (.nes).
 - Local IndexedDB library for imported games and favorites.
@@ -18,7 +25,7 @@ Arabic-first Android retro game library with a local EmulatorJS runtime.
 - Manual GitHub Actions build only.
 
 ## Offline operation
-After installing the APK, imported Atari and NES ROMs can be launched without internet. The EmulatorJS loader, JavaScript runtime, CSS, and both normal and legacy core data files are bundled in the APK. Internet is needed only when the user explicitly chooses to download a free catalog game.
+After installing the APK, imported Atari and NES ROMs can be launched without internet. The EmulatorJS loader, JavaScript runtime, CSS, and normal and legacy core data files for all six supported platforms are bundled in the APK. Internet is needed only when the user explicitly chooses to download a free catalog game.
 
 ## Free game credits and licenses
 - 2048 2600 — Carlos Duarte do Nascimento (Chester), MIT: https://github.com/chesterbr/2048-2600
@@ -44,7 +51,7 @@ The workflow is intentionally manual; ordinary pushes do not trigger builds. And
 
 ## Technical notes
 - EmulatorJS stable runtime files are downloaded during CI and bundled locally.
-- Core payloads are downloaded from the stable data directory: stella2014-wasm.data, stella2014-legacy-wasm.data, fceumm-wasm.data, and fceumm-legacy-wasm.data.
+- Core payloads are downloaded from the stable data directory: stella2014, fceumm, gambatte, mgba, and genesis_plus_gx normal and legacy core data packs.
 - Android serves Flutter assets from a loopback-only HTTP server so WebView can use fetch, IndexedDB and WebAssembly with a local origin.
 - No commercial game ROMs are bundled. Users import ROMs they are entitled to use.
 - This is an independent community project and is not affiliated with Atari or Nintendo.
