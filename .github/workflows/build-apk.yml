@@ -81,7 +81,7 @@ jobs:
           storeFile=atari-release.jks
           EOF
           python3 scripts/configure_android_signing.py
-      - name: Download pinned offline EmulatorJS runtime and cores
+      - name: Download offline EmulatorJS runtime and cores
         run: |
           set -euo pipefail
           BASE="https://cdn.emulatorjs.org/nightly/data"
@@ -119,7 +119,7 @@ jobs:
           from pathlib import Path
           import re
           html = Path("assets/index.html").read_text()
-          scripts = re.findall(r"<script(?:\\s[^>]*)?>(.*?)</script>", html, re.S | re.I)
+          scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", html, re.S | re.I)
           Path("/tmp/app-inline.js").write_text("\\n".join(scripts))
           if not scripts:
               raise SystemExit("No inline application JavaScript found")
