@@ -48,8 +48,8 @@ class _EmulatorHomeState extends State<EmulatorHome> {
       ..addJavaScriptChannel(
         'NativeFilePicker',
         onMessageReceived: (message) {
-          if (message.message == 'pick') {
-            _pickRomFile();
+          if (message.message == 'pick' || message.message == 'pick:nes') {
+            _pickRomFile(nesOnly: message.message == 'pick:nes');
           }
         },
       )
@@ -66,14 +66,14 @@ class _EmulatorHomeState extends State<EmulatorHome> {
       ..loadFlutterAsset('assets/index.html');
   }
 
-  Future<void> _pickRomFile() async {
+  Future<void> _pickRomFile({bool nesOnly = false}) async {
     if (_pickingFile) return;
     _pickingFile = true;
 
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: const ['a26', 'bin', 'rom'],
+        allowedExtensions: nesOnly ? const ['nes'] : const ['a26', 'bin', 'rom', 'nes'],
         allowMultiple: false,
         withData: true,
       );
