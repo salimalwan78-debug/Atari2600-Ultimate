@@ -13,6 +13,7 @@ Arabic-first Android retro game library with a local EmulatorJS runtime.
 - Local IndexedDB library for imported games and favorites.
 - EmulatorJS runtime and required core data bundled in the APK.
 - Local loopback asset server provides an HTTP origin for WebAssembly, fetch, and IndexedDB without depending on a remote CDN.
+- Runtime callbacks report when the emulator is ready, when a game starts, and when startup fails; a watchdog reports hangs.
 - Free Atari homebrew catalog can be installed manually when internet is available; it is not downloaded automatically at app startup.
 - Manual GitHub Actions build only.
 
@@ -28,6 +29,9 @@ After installing the APK, imported Atari and NES ROMs can be launched without in
 - Snakes — Robin Sergeant, MIT: https://github.com/RobinSergeant/2600-Snakes
 
 Each catalog entry links to its upstream source and license. SHA-256 is checked before a catalog ROM is stored.
+
+## Automated validation
+The manual workflow runs project contract checks, Dart analysis, Flutter tests, JavaScript syntax validation, verifies all required runtime and core payloads are present in the APK, and verifies the APK signature before uploading it. These checks catch packaging and integration regressions; real device gameplay and offline behavior still require testing on a physical Android device.
 
 ## Build the APK
 1. Open Actions.
