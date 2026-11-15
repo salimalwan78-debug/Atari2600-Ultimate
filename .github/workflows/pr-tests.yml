@@ -97,10 +97,10 @@ jobs:
           from pathlib import Path
           import re
           html = Path("assets/index.html").read_text()
-          scripts = re.findall(r"<script(?:\\s[^>]*)?>(.*?)</script>", html, re.S | re.I)
+          scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", html, re.S | re.I)
           if not scripts:
               raise SystemExit("No inline application JavaScript found")
-          Path("/tmp/app-inline.js").write_text("\\n".join(scripts))
+          Path("/tmp/app-inline.js").write_text("\n".join(scripts))
           PY
           node --check /tmp/app-inline.js
 
