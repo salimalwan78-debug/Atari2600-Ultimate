@@ -159,7 +159,9 @@ jobs:
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/fceumm-wasm.data' /tmp/apk-files.txt
           grep -q 'assets/flutter_assets/assets/emulatorjs/data/cores/fceumm-legacy-wasm.data' /tmp/apk-files.txt
           echo "APK contains index, loader, runtime, CSS and all four selected core data variants."
-          apksigner verify --verbose "$APK"
+          APKSIGNER="$(find "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose "$APK"
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
