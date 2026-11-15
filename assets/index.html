@@ -48,8 +48,8 @@ input[type=file]{display:none}.hint{font-size:12px;color:var(--muted);line-heigh
 <button class="file-label primary" id="import-rom" type="button">＋ استيراد لعبة من جهازي</button><button class="secondary" id="import-many" type="button">＋ استيراد مجموعة ألعاب</button><input id="rom" type="file" accept=".a26,.bin,.rom,.nes,application/octet-stream" hidden>
 <button class="secondary" id="fullscreen">ملء الشاشة</button></div>
 <p class="hint">تُحفظ الألعاب المستوردة داخل التطبيق على جهازك، وتبقى في المكتبة بعد إغلاقه. يمكنك أيضاً إضافة ملفات ألعابك الخاصة بصيغ A26 وBIN وROM.</p>
-<div id="library" aria-live="polite"><div class="empty-list">جارٍ تحميل مكتبة الألعاب…</div></div>
-<div id="status" aria-live="polite">المحاكي جاهز.</div></section>
+</section>
+<section class="panel" id="library-panel"><div class="page-heading"><div><span class="eyebrow">YOUR GAME LIBRARY</span><h2 class="section-title" id="library-title">ألعاب Atari الخاصة بك</h2></div><span class="page-icon">📚</span></div><div id="library" aria-live="polite"><div class="empty-list">جارٍ تحميل مكتبة الألعاب…</div></div><div id="status" aria-live="polite">المحاكي جاهز.</div></section>
 <section class="panel" id="player-panel"><div class="page-heading"><div><span class="eyebrow">NOW PLAYING</span><h2 class="section-title">شاشة اللعب</h2></div><span class="page-icon">✨</span></div><div id="game-wrap"><div id="game"><div class="empty"><b>جاهز للانطلاق؟</b>اختر لعبة من مكتبتك وابدأ المغامرة.</div></div></div></section>
 <section class="panel" id="controls-panel"><h2 class="section-title">⌨️ التحكم</h2><p class="hint">اتجاهات الحركة للأسهم، وزر الإطلاق للمسافة. يدعم المحاكي عناصر تحكم لمسية على الشاشة، ويمكنك استخدام أزرار التحكم التي تظهر داخل نافذة اللعب.</p></section>
 </main><footer>ATARI 2600 ULTIMATE<br>مشروع مستقل يستخدم EmulatorJS · Stella 2014<br>الألعاب المجانية مرفقة بأسماء مطوريها وروابط تراخيصها.</footer>
@@ -83,7 +83,7 @@ function showPage(page){
  document.getElementById('free-panel').style.display=page==='atari'?'block':'none';
  document.getElementById('nes-panel').style.display=page==='nes'?'block':'none';
  document.getElementById('player-panel').style.display='block';
- document.getElementById('controls-panel').style.display=page==='atari'?'block':'none';
+ document.getElementById('controls-panel').style.display=page==='atari'?'block':'none';document.getElementById('library-title').textContent=page==='atari'?'ألعاب Atari الخاصة بك':page==='nes'?'ألعاب Nintendo NES':'ألعابك المفضلة';
  renderLibrary();
  window.scrollTo({top:0,behavior:'smooth'});
 }
