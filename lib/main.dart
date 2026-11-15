@@ -97,7 +97,7 @@ class _EmulatorHomeState extends State<EmulatorHome> {
       if (mounted) {
         setState(() {
           _loading = false;
-          _startupError = 'تعذر تشغيل خادم ملفات التطبيق المحلي. أعد تشغيل التطبيق.\\n\\nالتفاصيل: $error';
+          _startupError = 'تعذر تشغيل خادم ملفات التطبيق المحلي. أعد تشغيل التطبيق.\n\nالتفاصيل: $error';
         });
       }
       debugPrint('Local asset server failed: $error');
