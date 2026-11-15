@@ -62,6 +62,8 @@ void main() {
     expect(html, contains('import-backup'));
     expect(html, contains('saveState:true'));
     expect(html, contains('loadState:true'));
+    expect(html, contains("window.EJS_gameName=resolvedSystem+'-'+name.replace"));
+    expect(html, contains('let restored=0,skipped=0'));
     expect(html, contains('data-key="ArrowUp"'));
     expect(html, contains('accept=".a26,.bin,.rom,application/octet-stream"'));
     expect(html, isNot(contains('accept=".a26,.bin,.rom,.nes,application/octet-stream"')));
