@@ -72,11 +72,30 @@ jobs:
           main_activity = next((a for a in app_node.findall("activity") if a.get(android + "name") == ".MainActivity"), None)
           if main_activity is None:
               raise SystemExit("Generated manifest has no launcher MainActivity")
-          if not any(m.get(android + "name") == "flutterEmbedding" for m in main_activity.findall("meta-data")):
-              meta = ET.SubElement(main_activity, "meta-data")
-              meta.set(android + "name", "flutterEmbedding")
-              meta.set(android + "value", "2")
+          # Flutter requires this V2 marker directly under <application>.
+          # Placing it inside <activity> is ignored by Flutter's migration check.
+          for activity_node in app_node.findall("activity"):
+              for meta in list(activity_node.findall("meta-data")):
+                  if meta.get(android + "name") == "flutterEmbedding":
+                      activity_node.remove(meta)
+          embedding_meta = next(
+              (m for m in app_node.findall("meta-data")
+               if m.get(android + "name") == "flutterEmbedding"),
+              None,
+          )
+          if embedding_meta is None:
+              embedding_meta = ET.SubElement(app_node, "meta-data")
+              embedding_meta.set(android + "name", "flutterEmbedding")
+          embedding_meta.set(android + "value", "2")
           tree.write(manifest, encoding="utf-8", xml_declaration=True)
+          verified = ET.parse(manifest).getroot()
+          verified_app = verified.find("application")
+          if verified_app is None or not any(
+              m.get(android + "name") == "flutterEmbedding"
+              and m.get(android + "value") == "2"
+              for m in verified_app.findall("meta-data")
+          ):
+              raise SystemExit("Flutter V2 embedding marker is missing from <application>")
 
           legacy_tokens = (
               "io.flutter.app.FlutterActivity",
