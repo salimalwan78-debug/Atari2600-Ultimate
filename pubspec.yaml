@@ -18,4 +18,6 @@ flutter:
   assets:
     - assets/index.html
     - assets/emulatorjs/data/
-    - assets/emulatorjs/data/cores/\n    - assets/emulatorjs/data/src/\n    - assets/emulatorjs/data/localization/
+    - assets/emulatorjs/data/cores/
+    - assets/emulatorjs/data/src/
+    - assets/emulatorjs/data/localization/
