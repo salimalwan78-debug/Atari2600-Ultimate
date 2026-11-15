@@ -1,11 +1,18 @@
 name: Build Atari 2600 APK
 on:
   workflow_dispatch:
+    inputs:
+      app_version:
+        description: "Public app version (V0, V1, V2...)"
+        required: true
+        default: "V0"
 permissions:
   contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      APP_VERSION: ${{ github.event.inputs.app_version || 'V0' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,15 +29,31 @@ jobs:
           cache: true
       - name: Generate Android platform
         run: flutter create --platforms=android --org com.atari2600ultimate .
+      - name: Download offline EmulatorJS runtime and cores
+        run: |
+          set -euo pipefail
+          BASE="https://cdn.emulatorjs.org/stable/data"
+          mkdir -p assets/emulatorjs/data/cores
+          curl -fL "$BASE/loader.js" -o assets/emulatorjs/data/loader.js
+          curl -fL "$BASE/emulator.min.js" -o assets/emulatorjs/data/emulator.min.js
+          curl -fL "$BASE/emulator.min.css" -o assets/emulatorjs/data/emulator.min.css
+          curl -fL "$BASE/cores/stella2014.zip" -o /tmp/stella2014.zip
+          curl -fL "$BASE/cores/fceumm.zip" -o /tmp/fceumm.zip
+          unzip -o /tmp/stella2014.zip -d assets/emulatorjs/data/cores
+          unzip -o /tmp/fceumm.zip -d assets/emulatorjs/data/cores
+          test -n "$(find assets/emulatorjs/data/cores -type f | head -1)"
+      - name: Set app version in interface
+        run: |
+          sed -i "s/const APP_VERSION = '[^']*';/const APP_VERSION = '${APP_VERSION}';/" assets/index.html
       - name: Install dependencies
         run: flutter pub get
       - name: Analyze
         run: flutter analyze
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --dart-define=APP_VERSION="${APP_VERSION}"
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Atari2600-Ultimate-APK
+          name: Atari2600-Ultimate-${{ github.event.inputs.app_version || 'V0' }}
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
