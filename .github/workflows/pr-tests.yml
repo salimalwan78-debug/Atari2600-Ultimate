@@ -1,0 +1,111 @@
+name: PR Test Suite (no APK)
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request number to test"
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-tests-${{ github.event.issue.number || inputs.pr_number }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    if: >-
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       github.event.comment.body == '/run-tests' &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Resolve pull request head
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const number = context.eventName === 'workflow_dispatch'
+              ? Number(core.getInput('pr_number'))
+              : context.issue.number;
+            if (!Number.isInteger(number) || number < 1) {
+              core.setFailed('A valid pull request number is required.');
+              return;
+            }
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: number
+            });
+            if (pr.state !== 'open') {
+              core.setFailed('Only open pull requests can be tested.');
+              return;
+            }
+            core.setOutput('number', String(number));
+            core.setOutput('repo', pr.head.repo.full_name);
+            core.setOutput('sha', pr.head.sha);
+            core.info(`Testing PR #${number} at ${pr.head.sha} from ${pr.head.repo.full_name}`);
+
+      - name: Checkout pull request source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.pr.outputs.repo }}
+          ref: ${{ steps.pr.outputs.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.38.5"
+          cache: true
+
+      - name: Validate project contracts
+        run: python3 scripts/validate_project.py
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Analyze Dart
+        run: flutter analyze --no-pub
+
+      - name: Run Flutter tests
+        run: flutter test --no-pub
+
+      - name: Validate inline JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("assets/index.html").read_text()
+          scripts = re.findall(r"<script(?:\\s[^>]*)?>(.*?)</script>", html, re.S | re.I)
+          if not scripts:
+              raise SystemExit("No inline application JavaScript found")
+          Path("/tmp/app-inline.js").write_text("\\n".join(scripts))
+          PY
+          node --check /tmp/app-inline.js
+
+      - name: Report tested revision
+        run: |
+          echo "PR #${{ steps.pr.outputs.number }}"
+          echo "Commit: ${{ steps.pr.outputs.sha }}"
+          echo "Test suite completed without building an APK."
