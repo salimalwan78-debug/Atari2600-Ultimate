@@ -36,6 +36,8 @@ for marker in ('data-page="gb"', 'data-page="gbc"', 'data-page="gba"', 'data-pag
     require(marker in html, f"Missing platform/import marker: {marker}.")
 for feature in ("export-backup", "import-backup", "library-search", "grid-view", "data-key=" + '"ArrowUp"', "saveState:true", "loadState:true"):
     require(feature in html, f"Missing requested feature: {feature}.")
+require("window.EJS_core=({atari:'atari2600',nes:'nes',gb:'gb',gbc:'gb',gba:'gba',genesis:'segaMD'})[system]" in html,
+        "Game Boy and Game Boy Color must both route to the documented GB system.")
 require("window.receiveNativeRom=function(name,base64,launch=true,system=null)" in html,
         "Native import bridge must preserve the selected platform.")
 require("EJS_pathtodata='/assets/emulatorjs/data/'" in html,
