@@ -242,8 +242,38 @@ jobs:
               raise SystemExit("No inline application JavaScript found")
           PY
           node --check /tmp/app-inline.js
-      - name: Build signed release APK
-        run: flutter build apk --release --build-name=0.0.0 --build-number=${{ steps.version.outputs.build_number }}
+      - name: Restore Gradle dependency cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+      - name: Build signed release APK (retry Maven rate limits)
+        shell: bash
+        run: |
+          set -uo pipefail
+          BUILD_CMD=(flutter build apk --release --build-name=0.0.0 --build-number=${{ steps.version.outputs.build_number }})
+          for attempt in 1 2 3; do
+            echo "APK build attempt $attempt/3"
+            if "${BUILD_CMD[@]}" 2>&1 | tee "/tmp/flutter-build-$attempt.log"; then
+              exit 0
+            fi
+            status=${PIPESTATUS[0]}
+            if ! grep -Eqi '429|Too Many Requests|status code 429' "/tmp/flutter-build-$attempt.log"; then
+              echo "Build failed for a reason other than Maven HTTP 429; not retrying."
+              exit "$status"
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              delay=$((attempt * 30))
+              echo "Maven Central rate-limited the runner (HTTP 429). Retrying in $delay seconds..."
+              sleep "$delay"
+            fi
+          done
+          echo "Build failed after 3 attempts due to repeated Maven HTTP 429 responses."
+          exit 1
       - name: Verify APK contains offline emulator payload
         run: |
           set -euo pipefail
