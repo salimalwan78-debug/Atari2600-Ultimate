@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: "Pull request number to test"
-        required: true
+        description: "Optional open pull request number (leave empty to test the selected branch)"
+        required: false
         type: number
 
 permissions:
@@ -34,26 +34,34 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const number = context.eventName === 'workflow_dispatch'
-              ? Number(context.payload.inputs?.pr_number)
-              : context.issue.number;
-            if (!Number.isInteger(number) || number < 1) {
-              core.setFailed('A valid pull request number is required.');
-              return;
+            const requested = context.eventName === 'workflow_dispatch'
+              ? context.payload.inputs?.pr_number
+              : String(context.issue.number);
+            if (requested) {
+              const number = Number(requested);
+              if (!Number.isInteger(number) || number < 1) {
+                core.setFailed('A valid pull request number is required.');
+                return;
+              }
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: number
+              });
+              if (pr.state !== 'open') {
+                core.setFailed('Only open pull requests can be tested. For merged code, run this workflow manually without a PR number.');
+                return;
+              }
+              core.setOutput('number', String(number));
+              core.setOutput('repo', pr.head.repo.full_name);
+              core.setOutput('sha', pr.head.sha);
+              core.info(`Testing PR #${number} at ${pr.head.sha} from ${pr.head.repo.full_name}`);
+            } else {
+              core.setOutput('number', 'branch');
+              core.setOutput('repo', context.repo.owner + '/' + context.repo.repo);
+              core.setOutput('sha', context.sha);
+              core.info(`Testing selected branch at ${context.sha}`);
             }
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: number
-            });
-            if (pr.state !== 'open') {
-              core.setFailed('Only open pull requests can be tested.');
-              return;
-            }
-            core.setOutput('number', String(number));
-            core.setOutput('repo', pr.head.repo.full_name);
-            core.setOutput('sha', pr.head.sha);
-            core.info(`Testing PR #${number} at ${pr.head.sha} from ${pr.head.repo.full_name}`);
 
       - name: Checkout pull request source
         uses: actions/checkout@v4
@@ -78,6 +86,40 @@ jobs:
           channel: stable
           flutter-version: "3.38.5"
           cache: true
+
+      - name: Download EmulatorJS assets required by Flutter analysis
+        run: |
+          set -euo pipefail
+          BASE="https://cdn.emulatorjs.org/stable/data"
+          DATA_DIR="assets/emulatorjs/data"
+          CORE_DIR="$DATA_DIR/cores"
+          SRC_DIR="$DATA_DIR/src"
+          LOCALE_DIR="$DATA_DIR/localization"
+          COMPRESSION_DIR="$DATA_DIR/compression"
+          mkdir -p "$CORE_DIR" "$SRC_DIR" "$LOCALE_DIR" "$COMPRESSION_DIR"
+          for file in loader.js emulator.min.js emulator.min.css emulator.css version.json; do
+            curl --retry 3 --retry-all-errors -fL "$BASE/$file" -o "$DATA_DIR/$file"
+            test -s "$DATA_DIR/$file"
+          done
+          for file in extract7z.js extractzip.js libunrar.js libunrar.wasm; do
+            curl --retry 3 --retry-all-errors -fL "$BASE/compression/$file" -o "$COMPRESSION_DIR/$file"
+            test -s "$COMPRESSION_DIR/$file"
+          done
+          for file in GameManager.js compression.js emulator.js gamepad.js nipplejs.js shaders.js socket.io.min.js storage.js; do
+            curl --retry 3 --retry-all-errors -fL "$BASE/src/$file" -o "$SRC_DIR/$file"
+            test -s "$SRC_DIR/$file"
+          done
+          curl --retry 3 --retry-all-errors -fL "$BASE/localization/ar-AR.json" -o "$LOCALE_DIR/ar-AR.json"
+          curl --retry 3 --retry-all-errors -fL "$BASE/cores/cores.json" -o "$CORE_DIR/cores.json"
+          test -s "$LOCALE_DIR/ar-AR.json"
+          test -s "$CORE_DIR/cores.json"
+          for core in stella2014 fceumm gambatte mgba genesis_plus_gx; do
+            for variant in "" "-legacy"; do
+              file="${core}${variant}-wasm.data"
+              curl --retry 3 --retry-all-errors -fL "$BASE/cores/$file" -o "$CORE_DIR/$file"
+              test -s "$CORE_DIR/$file"
+            done
+          done
 
       - name: Validate project contracts
         run: python3 scripts/validate_project.py
@@ -106,6 +148,6 @@ jobs:
 
       - name: Report tested revision
         run: |
-          echo "PR #${{ steps.pr.outputs.number }}"
+          echo "Target: ${{ steps.pr.outputs.number }}"
           echo "Commit: ${{ steps.pr.outputs.sha }}"
           echo "Test suite completed without building an APK."
